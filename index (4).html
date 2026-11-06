@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mosek Multi Services - Gestion de Caisse & Transferts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #1e40af;
+      --primary-hover: #1d4ed8;
+      --bg-slate: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --success-green: #16a34a;
+      --danger-red: #dc2626;
+      --gold: #fbbf24;
+      --navy-dark: #0b1b4d;
+      --navy-mid: #1e3a8a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-slate);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ============ EN-TÊTE PRINCIPAL (NOUVEAU DESIGN) ============ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.35), transparent 45%),
+        radial-gradient(circle at 90% 100%, rgba(251, 191, 36, 0.18), transparent 40%),
+        linear-gradient(120deg, var(--navy-dark) 0%, var(--navy-mid) 55%, #2563eb 100%);
+      color: #ffffff;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      box-shadow: 0 8px 24px rgba(11, 27, 77, 0.35);
+      overflow: visible;
+    }
+
+    /* Liseré doré en bas de l'entête */
+    header::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), #f59e0b, var(--gold), transparent);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .menu-toggle-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s;
+    }
+
+    .menu-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .turtle-logo-wrapper {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25), 0 8px 18px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .curved-text {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .curved-text text {
+      font-size: 7px;
+      font-weight: 800;
+      fill: var(--primary-blue);
+      letter-spacing: 0.8px;
+    }
+
+    .agency-info h1 {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      background: linear-gradient(90deg, #ffffff 0%, #fde68a 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .agency-tagline {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .agency-location {
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .contact-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .contact-chip {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e0e7ff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .clock-badge {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 8px 16px;
+      border-radius: 12px;
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .clock-badge .time {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 1px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock-badge .date {
+      font-size: 10px;
+      color: #bfdbfe;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 1px;
+    }
+
+    .rate-badges {
+      display: flex;
+      gap: 10px;
+    }
+
+    .rate-card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.95), rgba(224,231,255,0.95));
+      border-radius: 12px;
+      padding: 6px 12px;
+      text-align: center;
+      border-bottom: 3px solid var(--gold);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .rate-card label {
+      font-size: 9px;
+      color: var(--primary-blue);
+      display: block;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .rate-card input {
+      width: 62px;
+      border: none;
+      background: transparent;
+      font-weight: 900;
+      font-size: 16px;
+      text-align: center;
+      color: var(--navy-dark);
+      outline: none;
+    }
+
+    .rate-refresh {
+      border: none;
+      background: var(--primary-blue);
+      color: #ffffff;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      font-size: 10px;
+      line-height: 16px;
+      cursor: pointer;
+      margin-left: 3px;
+      padding: 0;
+    }
+
+    .rate-status {
+      font-size: 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 1px;
+      max-width: 90px;
+    }
+
+    .rate-status.ok { color: #15803d; }
+    .rate-status.err { color: #b91c1c; }
+
+    .turtle-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+      padding: 4px;
+    }
+
+    .svc-logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .svc-logo-sm {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .logo-fallback {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      min-width: 36px;
+      min-height: 36px;
+      background: #e2e8f0;
+      color: var(--primary-blue);
+      font-weight: 900;
+      border-radius: 12px;
+    }
+
+    /* Menu Flottant */
+    .dropdown-menu-container {
+      position: fixed;
+      top: 100px;
+      left: 20px;
+      background: #0f172a;
+      color: white;
+      width: 260px;
+      border-radius: 14px;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    .dropdown-menu-container.active {
+      display: block;
+    }
+
+    .dropdown-menu-header {
+      padding: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      border-bottom: 1px solid #1e293b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dropdown-menu-list {
+      list-style: none;
+      padding: 8px;
+    }
+
+    .dropdown-item {
+      padding: 10px 14px;
+      color: #94a3b8;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .dropdown-item:hover, .dropdown-item.active {
+      background-color: var(--primary-blue);
+      color: white;
+    }
+
+    /* Bandeau Caissier */
+    .user-banner {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .user-greeting {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-greeting::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+    }
+
+    .user-email-badge {
+      background: #eff6ff;
+      color: var(--primary-blue);
+      border: 1px solid #bfdbfe;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    .btn-logout {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--danger-red);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #fee2e2;
+    }
+
+    @media (max-width: 700px) {
+      header { padding: 12px 16px; }
+      .agency-info h1 { font-size: 18px; }
+      .turtle-logo-wrapper { width: 62px; height: 62px; }
+      .dropdown-menu-container { top: 90px; left: 12px; }
+      .user-banner { padding: 10px 16px; }
+    }
+
+    /* Contenu Principal */
+    .content {
+      padding: 30px;
+      max-width: 1250px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: var(--text-main);
+    }
+
+    /* Cartes de Service Accueil */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .service-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .service-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.06);
+    }
+
+    .service-name {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    .service-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* SECTION BILAN PHYSIQUE CAISSE */
+    .bilan-caisse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .caisse-box {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+    }
+
+    .caisse-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+
+    .caisse-title-flag {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flag-icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .caisse-title-flag h3 {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .solde-display {
+      font-size: 28px;
+      font-weight: 900;
+      margin: 12px 0;
+    }
+
+    .caisse-stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .count-input-group {
+      margin-top: 15px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .count-input-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .count-input-group input {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      border: 1px solid #93c5fd;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .ecart-badge {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ecart-zero {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .ecart-negative {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .ecart-positive {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    /* SECTION RAPPORT DE SYNTHÈSE */
+    .rapport-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .rapport-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .rapport-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .rapport-card-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--border-color);
+      font-size: 13px;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .metric-value {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .highlight-box {
+      background: #f1f5f9;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* Modales */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* Tableaux */
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- En-tête Principal -->
+  <header>
+    <div class="header-left">
+      <button class="menu-toggle-btn" onclick="toggleMenu()">☰ Menu</button>
+
+      <div class="logo-container">
+        <div class="turtle-logo-wrapper">
+          <svg class="curved-text" viewBox="0 0 100 100">
+            <path id="curve" d="M 12,50 A 38,38 0 0,1 88,50" fill="transparent" />
+            <text><textPath href="#curve" startOffset="50%" text-anchor="middle">MOSEK MULTI SERVICES</textPath></text>
+          </svg>
+          <svg width="40" height="40" viewBox="0 0 100 100" style="margin-top: 14px;">
+            <ellipse cx="50" cy="52" rx="30" ry="22" fill="#2563eb" />
+            <path d="M 50 30 C 35 30 25 42 25 52 C 25 62 35 74 50 74 C 65 74 75 62 75 52 C 75 42 65 30 50 30 Z" fill="#3b82f6" />
+            <circle cx="50" cy="20" r="9" fill="#1d4ed8" />
+            <circle cx="21" cy="35" r="6" fill="#1d4ed8" />
+            <circle cx="79" cy="35" r="6" fill="#1d4ed8" />
+            <circle cx="26" cy="67" r="6" fill="#1d4ed8" />
+            <circle cx="74" cy="67" r="6" fill="#1d4ed8" />
+          </svg>
+        </div>
+        <div class="agency-info">
+          <h1>MOSEK MULTI SERVICES</h1>
+          <div class="agency-tagline">Système de gestion financière et d'opérations de caisse</div>
+          <div class="agency-location">📍 Trois-Rivières, Port-de-Paix, Haïti</div>
+          <div class="contact-chips">
+            <span class="contact-chip">📞 +1 954 625 4059</span>
+            <span class="contact-chip">📞 +1 954 588 3631</span>
+            <span class="contact-chip">📞 +509 4136 6032</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Déroulant Escamotable -->
+    <div class="dropdown-menu-container" id="dropdownMenu">
+      <div class="dropdown-menu-header">Navigation</div>
+      <ul class="dropdown-menu-list">
+        <li class="dropdown-item active" onclick="switchView('accueil', this)">🏠 Accueil & Services</li>
+        <li class="dropdown-item" onclick="switchView('journal', this)">📋 Journal des transactions</li>
+        <li class="dropdown-item" onclick="switchView('rapport', this)">📊 Rapport de synthèse</li>
+        <li class="dropdown-item" onclick="switchView('bilan', this)">💰 Bilan physique de caisse</li>
+        <li class="dropdown-item" onclick="switchView('parametres', this)">⚙️ Paramètres</li>
+      </ul>
+    </div>
+
+    <div class="header-right">
+      <div class="clock-badge">
+        <div class="time" id="liveClock">00:00:00</div>
+        <div class="date" id="liveDate">Chargement...</div>
+      </div>
+      <div class="rate-badges">
+        <div class="rate-card">
+          <label>Zelle</label>
+          <input type="number" id="tauxZelle" value="130" oninput="updateRapport()">
+        </div>
+        <div class="rate-card">
+          <label>BRH <button type="button" class="rate-refresh" onclick="fetchBRHRate(true)" title="Actualiser le taux">↻</button></label>
+          <input type="number" step="0.01" id="tauxBRH" value="132.50" oninput="onBRHManualEdit()">
+          <div class="rate-status" id="brhStatus">Recherche…</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bandeau Caissier Connecté -->
+  <div class="user-banner">
+    <div class="user-greeting" id="userGreeting">
+      <span>Caissier connecté : <strong id="cashierName">Osmin</strong></span>
+      <span class="user-email-badge" id="cashierEmail">mosekmultiservicesppx@gmail.com</span>
+    </div>
+    <button class="btn-logout" onclick="toggleSession()">Déconnexion</button>
+  </div>
+
+  <!-- Contenu Principal -->
+  <div class="content">
+
+    <!-- 1. VUE ACCUEIL -->
+    <div id="view-accueil" class="view-section active">
+      <h2 class="section-title">Services & Opérations</h2>
+
+      <div class="cards-grid">
+        <div class="service-card" onclick="openModal('zelle')">
+          <svg width="36" height="36" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#6b21a8"/><text x="50" y="68" font-size="65" font-weight="900" fill="#ffffff" text-anchor="middle">Z</text></svg>
+          <div class="service-name" style="color: #6b21a8;">Zelle</div>
+          <div class="service-desc">Paiement / Envoi USD</div>
+        </div>
+
+        <div class="service-card" onclick="openModal('unitransfer')">
+          <svg width="36" height="36" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#facc15"/><text x="50" y="48" font-size="32" font-weight="900" fill="#1e40af" text-anchor="middle">UNI</text><text x="50" y="78" font-size="22" font-weight="900" fill="#dc2626" text-anchor="middle">TRANSFER</text></svg>
+          <div class="service-name" style="color: #1e40af;">Unitransfer</div>
+          <div class="service-desc">Transfert HTG (Unibank)</div>
+        </div>
+
+        <div class="service-card" onclick="openModal('cam')">
+          <svg width="36" height="36" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#facc15"/><ellipse cx="50" cy="50" rx="40" ry="24" fill="#000000"/><text x="50" y="58" font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle">C.A.M.</text></svg>
+          <div class="service-name" style="color: #ca8a04;">CAM</div>
+          <div class="service-desc">Transfert HTG (BUH)</div>
+        </div>
+
+        <div class="service-card" onclick="openModal('natcash')">
+          <svg width="36" height="36" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#ea580c"/><text x="50" y="62" font-size="26" font-weight="900" fill="#ffffff" text-anchor="middle">natcash</text></svg>
+          <div class="service-name" style="color: #ea580c;">Natcash</div>
+          <div class="service-desc">Dépôt / Retrait Mobile</div>
+        </div>
+
+        <div class="service-card" onclick="openModal('internes')">
+          <svg width="36" height="36" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#0d9488"/><path d="M 30 50 L 70 50 M 50 30 L 70 50 L 50 70" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <div class="service-name" style="color: #0d9488;">Transactions Internes</div>
+          <div class="service-desc">Entrée / Sortie Caisse</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Journal des Opérations Récentes</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Réf</th>
+              <th>Heure</th>
+              <th>Service</th>
+              <th>Type</th>
+              <th>Montant</th>
+              <th>Caissier & E-mail</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="transactionLog"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. VUE JOURNAL GENERAL -->
+    <div id="view-journal" class="view-section">
+      <h2 class="section-title">Journal Général des Transactions</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Réf</th>
+              <th>Heure</th>
+              <th>Service</th>
+              <th>Type / Détails</th>
+              <th>Montant HTG</th>
+              <th>Montant USD</th>
+              <th>Auteur / Client</th>
+              <th>Caissier</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="fullTransactionLog"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. VUE RAPPORT DE SYNTHÈSE -->
+    <div id="view-rapport" class="view-section">
+      <h2 class="section-title">Rapport de Synthèse Global par Service</h2>
+
+      <div class="rapport-grid">
+
+        <!-- Carte Unitransfer -->
+        <div class="rapport-card">
+          <div class="rapport-card-header">
+            <svg width="30" height="30" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#facc15"/><text x="50" y="48" font-size="30" font-weight="900" fill="#1e40af" text-anchor="middle">UNI</text><text x="50" y="78" font-size="20" font-weight="900" fill="#dc2626" text-anchor="middle">TRANS</text></svg>
+            <div>
+              <h3>Unitransfer (Unibank)</h3>
+              <p style="font-size: 11px; color: var(--text-muted);">Synthèse des transferts</p>
+            </div>
+          </div>
+          <div class="metric-row"><span class="metric-label">Volume de transactions</span><span class="metric-value" id="uniVol">0</span></div>
+          <div class="metric-row"><span class="metric-label">Total Payé (Sortie Caisse)</span><span class="metric-value" id="uniTotalPaye">0.00 HTG</span></div>
+          <div class="metric-row"><span class="metric-label">Total Envoyé (Entrée Caisse)</span><span class="metric-value" id="uniTotalEnvoye">0.00 HTG</span></div>
+          <div class="highlight-box">
+            <div class="metric-row"><span class="metric-label">Fonds HTG Unibank (70%)</span><span class="metric-value" style="color: #1e40af;" id="uniFonds70">0.00 HTG</span></div>
+            <div class="metric-row"><span class="metric-label">Fonds USD Unibank (30% au Taux BRH)</span><span class="metric-value" style="color: #0d9488;" id="uniFonds30">$0.00 USD</span></div>
+          </div>
+        </div>
+
+        <!-- Carte CAM -->
+        <div class="rapport-card">
+          <div class="rapport-card-header">
+            <svg width="30" height="30" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#facc15"/><ellipse cx="50" cy="50" rx="40" ry="24" fill="#000000"/><text x="50" y="58" font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle">CAM</text></svg>
+            <div>
+              <h3>CAM (BUH)</h3>
+              <p style="font-size: 11px; color: var(--text-muted);">Synthèse des transferts</p>
+            </div>
+          </div>
+          <div class="metric-row"><span class="metric-label">Volume de transactions</span><span class="metric-value" id="camVol">0</span></div>
+          <div class="metric-row"><span class="metric-label">Total Payé (Sortie Caisse)</span><span class="metric-value" id="camTotalPaye">0.00 HTG</span></div>
+          <div class="metric-row"><span class="metric-label">Total Envoyé (Entrée Caisse)</span><span class="metric-value" id="camTotalEnvoye">0.00 HTG</span></div>
+          <div class="highlight-box">
+            <div class="metric-row"><span class="metric-label">Fonds HTG BUH (70%)</span><span class="metric-value" style="color: #1e40af;" id="camFonds70">0.00 HTG</span></div>
+            <div class="metric-row"><span class="metric-label">Fonds USD BUH (30% au Taux BRH)</span><span class="metric-value" style="color: #0d9488;" id="camFonds30">$0.00 USD</span></div>
+            <div class="metric-row"><span class="metric-label">Total Avantage (Formule à venir)</span><span class="metric-value" style="color: #d97706;" id="camAvantage">0.00 HTG</span></div>
+          </div>
+        </div>
+
+        <!-- Carte Natcash -->
+        <div class="rapport-card">
+          <div class="rapport-card-header">
+            <svg width="30" height="30" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#ea580c"/><text x="50" y="62" font-size="24" font-weight="900" fill="#ffffff" text-anchor="middle">nat</text></svg>
+            <div>
+              <h3>Natcash</h3>
+              <p style="font-size: 11px; color: var(--text-muted);">Portefeuille mobile</p>
+            </div>
+          </div>
+          <div class="metric-row"><span class="metric-label">Total Crédit (Dépôts / Entrée Caisse)</span><span class="metric-value" style="color: var(--success-green);" id="natCredit">0.00 HTG</span></div>
+          <div class="metric-row"><span class="metric-label">Total Débit (Retraits / Sortie Caisse)</span><span class="metric-value" style="color: var(--danger-red);" id="natDebit">0.00 HTG</span></div>
+          <div class="metric-row"><span class="metric-label">Commissions Totales (Indicatif)</span><span class="metric-value" style="color: #d97706;" id="natCommissions">0.00 HTG</span></div>
+          <div class="count-input-group" style="margin-top: 12px; padding: 10px;">
+            <label style="font-size: 11px;">Solde actuel / disponible</label>
+            <input type="number" id="natBalancePhone" placeholder="0.00 HTG" style="padding: 6px 10px; font-size: 13px;">
+          </div>
+        </div>
+
+        <!-- Carte Zelle -->
+        <div class="rapport-card">
+          <div class="rapport-card-header">
+            <svg width="30" height="30" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#6b21a8"/><text x="50" y="68" font-size="55" font-weight="900" fill="#ffffff" text-anchor="middle">Z</text></svg>
+            <div>
+              <h3>Zelle (USD)</h3>
+              <p style="font-size: 11px; color: var(--text-muted);">Transferts en Dollars US</p>
+            </div>
+          </div>
+          <div class="metric-row"><span class="metric-label">Total Envoyé</span><span class="metric-value" id="zelTotalEnvoye">$0.00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total Payé</span><span class="metric-value" id="zelTotalPaye">$0.00 USD</span></div>
+          <div class="highlight-box">
+            <div class="metric-row"><span class="metric-label">Montant Total Ordonné par Osmin</span><span class="metric-value" style="color: #6b21a8;" id="zelOsminTotal">$0.00 USD</span></div>
+            <div class="metric-row"><span class="metric-label">Montant Total Ordonné par Ocgénor</span><span class="metric-value" style="color: #0284c7;" id="zelOcgenorTotal">$0.00 USD</span></div>
+          </div>
+        </div>
+
+        <!-- Carte Transactions Internes -->
+        <div class="rapport-card">
+          <div class="rapport-card-header">
+            <svg width="30" height="30" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#0d9488"/><path d="M 30 50 L 70 50 M 50 30 L 70 50 L 50 70" stroke="#ffffff" stroke-width="10" fill="none"/></svg>
+            <div>
+              <h3>Transactions Internes</h3>
+              <p style="font-size: 11px; color: var(--text-muted);">Mouvements de Caisse Interne</p>
+            </div>
+          </div>
+          <div class="metric-row"><span class="metric-label">Total Entrée de fonds</span><span class="metric-value" style="color: var(--success-green);" id="intTotalEntree">0.00 HTG / $0.00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total Sortie de fonds</span><span class="metric-value" style="color: var(--danger-red);" id="intTotalSortie">0.00 HTG / $0.00 USD</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 4. VUE BILAN PHYSIQUE DE CAISSE -->
+    <div id="view-bilan" class="view-section">
+      <h2 class="section-title">Bilan Physique de Caisse & Comptage Réel</h2>
+
+      <div class="bilan-caisse-grid">
+
+        <!-- Caisse HTG -->
+        <div class="caisse-box">
+          <div class="caisse-box-header">
+            <div class="caisse-title-flag">
+              <span class="flag-icon">🇭🇹</span>
+              <div>
+                <h3>Caisse Gourdes (HTG)</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Solde Théorique de Caisse</p>
+              </div>
+            </div>
+          </div>
+          <div class="solde-display" id="caisseHTGDisplay" style="color: var(--primary-blue);">0.00 HTG</div>
+
+          <div class="caisse-stats-row">
+            <span>Entrées : <strong id="htgEntrees" style="color: var(--success-green);">+0.00</strong></span>
+            <span>Sorties : <strong id="htgSorties" style="color: var(--danger-red);">-0.00</strong></span>
+          </div>
+
+          <div class="count-input-group">
+            <label>Saisir le comptage physique réel (HTG) :</label>
+            <input type="number" step="0.01" id="realHTGInput" placeholder="Tapez les fonds physiques comptés..." oninput="calculateEcartHTG()">
+            <div id="ecartHTGBadge" class="ecart-badge ecart-zero">
+              <span>Écart de Caisse :</span>
+              <span id="ecartHTGValue">0.00 HTG</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Caisse USD -->
+        <div class="caisse-box">
+          <div class="caisse-box-header">
+            <div class="caisse-title-flag">
+              <span class="flag-icon">🇺🇸</span>
+              <div>
+                <h3>Caisse Dollars (USD)</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Solde Théorique de Caisse</p>
+              </div>
+            </div>
+          </div>
+          <div class="solde-display" id="caisseUSDDisplay" style="color: #0d9488;">$0.00 USD</div>
+
+          <div class="caisse-stats-row">
+            <span>Entrées : <strong id="usdEntrees" style="color: var(--success-green);">+$0.00</strong></span>
+            <span>Sorties : <strong id="usdSorties" style="color: var(--danger-red);">-$0.00</strong></span>
+          </div>
+
+          <div class="count-input-group">
+            <label>Saisir le comptage physique réel (USD) :</label>
+            <input type="number" step="0.01" id="realUSDInput" placeholder="Tapez les fonds physiques comptés..." oninput="calculateEcartUSD()">
+            <div id="ecartUSDBadge" class="ecart-badge ecart-zero">
+              <span>Écart de Caisse :</span>
+              <span id="ecartUSDValue">$0.00 USD</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 5. VUE PARAMETRES -->
+    <div id="view-parametres" class="view-section">
+      <h2 class="section-title">Paramètres du Système</h2>
+      <p style="color: #64748b;">Options de configuration et caissiers enregistrés.</p>
+    </div>
+
+  </div>
+
+  <!-- MODALES DE SAISIE DE TRANSACTIONS -->
+  <!-- ZELLE -->
+  <div class="modal" id="modal-zelle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Transaction Zelle (USD)</h3>
+        <button class="modal-close" onclick="closeModal('zelle')">✕</button>
+      </div>
+      <form onsubmit="saveZelleTransaction(event)">
+        <div class="form-group"><label>Type d'opération</label><select id="zelType"><option value="Paiement">Paiement</option><option value="Envoi">Envoi</option></select></div>
+        <div class="form-group"><label>Expéditeur</label><input type="text" id="zelExp" placeholder="Nom de l'expéditeur" required></div>
+        <div class="form-group"><label>Bénéficiaire</label><input type="text" id="zelBen" placeholder="Nom du bénéficiaire" required></div>
+        <div class="form-group"><label>Montant US ($)</label><input type="number" step="0.01" id="zelMontantUS" placeholder="0.00" oninput="calculateZelleHTG()" required></div>
+        <div class="form-group"><label>Montant HTG (Calculé auto au taux Zelle)</label><input type="text" id="zelMontantHTG" readonly style="background: #f1f5f9; font-weight: 700;"></div>
+        <div class="form-group"><label>Auteur de la transaction</label><select id="zelAuteur"><option value="Ocgénor">Ocgénor</option><option value="Osmin">Osmin</option></select></div>
+        <div class="form-group"><label>Statut</label><select id="zelStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
+        <button type="submit" class="btn-submit">Enregistrer Zelle</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNITRANSFER -->
+  <div class="modal" id="modal-unitransfer">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Transaction Unitransfer</h3>
+        <button class="modal-close" onclick="closeModal('unitransfer')">✕</button>
+      </div>
+      <form onsubmit="saveUnitransferTransaction(event)">
+        <div class="form-group"><label>Type d'opération</label><select id="uniType"><option value="Envoi">Envoi (+ Caisse)</option><option value="Paiement">Paiement (- Caisse)</option></select></div>
+        <div class="form-group"><label>Numéro de transfert</label><input type="text" id="uniRefNum" placeholder="Ex: UNI-99281" required></div>
+        <div class="form-group"><label>Expéditeur</label><input type="text" id="uniExp" placeholder="Nom de l'expéditeur" required></div>
+        <div class="form-group"><label>Bénéficiaire</label><input type="text" id="uniBen" placeholder="Nom du bénéficiaire" required></div>
+        <div class="form-group"><label>Montant HTG</label><input type="number" step="0.01" id="uniMontant" placeholder="0.00" required></div>
+        <div class="form-group"><label>Statut</label><select id="uniStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
+        <button type="submit" class="btn-submit">Enregistrer Unitransfer</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CAM -->
+  <div class="modal" id="modal-cam">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Transaction C.A.M.</h3>
+        <button class="modal-close" onclick="closeModal('cam')">✕</button>
+      </div>
+      <form onsubmit="saveCamTransaction(event)">
+        <div class="form-group"><label>Type d'opération</label><select id="camType"><option value="Envoi">Envoi (+ Caisse)</option><option value="Paiement">Paiement (- Caisse)</option></select></div>
+        <div class="form-group"><label>Numéro de transfert</label><input type="text" id="camRefNum" placeholder="Ex: CAM-55421" required></div>
+        <div class="form-group"><label>Expéditeur</label><input type="text" id="camExp" placeholder="Nom de l'expéditeur" required></div>
+        <div class="form-group"><label>Bénéficiaire</label><input type="text" id="camBen" placeholder="Nom du bénéficiaire" required></div>
+        <div class="form-group"><label>Montant HTG</label><input type="number" step="0.01" id="camMontant" placeholder="0.00" required></div>
+        <div class="form-group"><label>Statut</label><select id="camStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
+        <button type="submit" class="btn-submit">Enregistrer CAM</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- NATCASH -->
+  <div class="modal" id="modal-natcash">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Transaction Natcash</h3>
+        <button class="modal-close" onclick="closeModal('natcash')">✕</button>
+      </div>
+      <form onsubmit="saveNatcashTransaction(event)">
+        <div class="form-group"><label>Type d'opération</label><select id="natType"><option value="Dépôt">Dépôt (+ Caisse)</option><option value="Retrait">Retrait (- Caisse)</option></select></div>
+        <div class="form-group"><label>Téléphone</label><input type="text" id="natTel" placeholder="+509 ..." required></div>
+        <div class="form-group"><label>Client</label><input type="text" id="natClient" placeholder="Nom du client" required></div>
+        <div class="form-group"><label>Montant HTG</label><input type="number" step="0.01" id="natMontant" placeholder="0.00" required></div>
+        <div class="form-group"><label>Commission (Indicative)</label><input type="number" step="0.01" id="natCommission" placeholder="0.00"></div>
+        <div class="form-group"><label>Statut</label><select id="natStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
+        <button type="submit" class="btn-submit">Enregistrer Natcash</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS INTERNES -->
+  <div class="modal" id="modal-internes">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Transaction Interne</h3>
+        <button class="modal-close" onclick="closeModal('internes')">✕</button>
+      </div>
+      <form onsubmit="saveInternalTransaction(event)">
+        <div class="form-group">
+          <label>Type de Mouvement</label>
+          <select id="intType" onchange="updateInternalMotifs(this.value)" required>
+            <option value="entree">Entrée de fonds (+ Caisse)</option>
+            <option value="sortie">Sortie de fonds (- Caisse)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Motif</label><select id="intMotif" required></select></div>
+        <div class="form-group"><label>Libellé / Explication</label><input type="text" id="intDescription" placeholder="Description courte" required></div>
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;"><label>Devise</label><select id="intDevise"><option value="HTG">HTG</option><option value="USD">USD</option></select></div>
+          <div style="flex: 2;"><label>Montant</label><input type="number" step="0.01" id="intMontant" placeholder="0.00" required></div>
+        </div>
+        <div class="form-group"><label>Statut</label><select id="intStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
+        <button type="submit" class="btn-submit">Enregistrer Transaction Interne</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Engine JavaScript -->
+  <script>
+    let loggedIn = true;
+    let currentCashier = { name: "Osmin", email: "mosekmultiservicesppx@gmail.com" };
+
+    // Variables de Caisse
+    let caisseHTGEntrees = 0, caisseHTGSorties = 0;
+    let caisseUSDEntrees = 0, caisseUSDSorties = 0;
+
+    // Stockage pour le rapport de synthèse
+    let transactionsData = [];
+
+    const motifs = {
+      entree: ["Renflouement", "Remboursement", "Retrait à la banque", "Retour de fonds", "Recettes diverses"],
+      sortie: ["Dépenses", "Payroll (Salaires)", "Frais de fonctionnement", "Dettes", "Avance sur salaire", "Achat fournitures"]
+    };
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').innerText = now.toLocaleTimeString();
+      document.getElementById('liveDate').innerText = now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ===== Détection automatique du taux BRH =====
+    // Le champ reste modifiable : si le caissier saisit un taux, la mise à jour
+    // automatique ne l'écrase plus tant qu'il n'appuie pas sur ↻.
+    let brhManual = false;
+
+    function setBRHStatus(text, cls) {
+      const el = document.getElementById('brhStatus');
+      el.innerText = text;
+      el.className = 'rate-status' + (cls ? ' ' + cls : '');
+    }
+
+    function onBRHManualEdit() {
+      brhManual = true;
+      setBRHStatus('Saisi manuellement', '');
+      updateRapport();
+    }
+
+    async function fetchBRHRate(force) {
+      if (brhManual && !force) return;
+      setBRHStatus('Recherche…', '');
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const rate = data && data.rates && data.rates.HTG;
+        if (!rate) throw new Error('Taux HTG absent');
+        document.getElementById('tauxBRH').value = parseFloat(rate).toFixed(2);
+        brhManual = false;
+        const heure = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        setBRHStatus('Auto • ' + heure, 'ok');
+        updateRapport();
+      } catch (err) {
+        setBRHStatus('Auto indisponible : saisir', 'err');
+      }
+    }
+
+    fetchBRHRate(false);
+    setInterval(() => fetchBRHRate(false), 30 * 60 * 1000);
+
+    function toggleMenu() {
+      document.getElementById('dropdownMenu').classList.toggle('active');
+    }
+
+    window.addEventListener('click', function(e) {
+      const menu = document.getElementById('dropdownMenu');
+      const btn = document.querySelector('.menu-toggle-btn');
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('active');
+      }
+    });
+
+    function switchView(viewName, element) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + viewName).classList.add('active');
+      element.classList.add('active');
+      document.getElementById('dropdownMenu').classList.remove('active');
+      if(viewName === 'rapport') updateRapport();
+    }
+
+    function toggleSession() {
+      loggedIn = !loggedIn;
+      const greeting = document.getElementById('userGreeting');
+      if (loggedIn) {
+        greeting.innerHTML = `<span>Caissier connecté : <strong>${currentCashier.name}</strong></span><span class="user-email-badge">${currentCashier.email}</span>`;
+      } else {
+        greeting.innerHTML = '<span style="color: #dc2626; font-weight: 600;">Au revoir et à bientôt ! (Déconnecté)</span>';
+      }
+    }
+
+    function openModal(id) {
+      if(id === 'internes') updateInternalMotifs('entree');
+      document.getElementById('modal-' + id)?.classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById('modal-' + id)?.classList.remove('active');
+    }
+
+    function updateInternalMotifs(type) {
+      const select = document.getElementById('intMotif');
+      select.innerHTML = '';
+      motifs[type].forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      });
+    }
+
+    function calculateZelleHTG() {
+      const montantUS = parseFloat(document.getElementById('zelMontantUS').value) || 0;
+      const tauxZelle = parseFloat(document.getElementById('tauxZelle').value) || 130;
+      document.getElementById('zelMontantHTG').value = (montantUS * tauxZelle).toFixed(2) + " HTG";
+    }
+
+    // Gestion du bilan et des calculs d'écarts
+    function updateCaisseDisplay() {
+      const netHTG = caisseHTGEntrees - caisseHTGSorties;
+      const netUSD = caisseUSDEntrees - caisseUSDSorties;
+
+      document.getElementById('caisseHTGDisplay').innerText = netHTG.toFixed(2) + " HTG";
+      document.getElementById('htgEntrees').innerText = "+" + caisseHTGEntrees.toFixed(2);
+      document.getElementById('htgSorties').innerText = "-" + caisseHTGSorties.toFixed(2);
+
+      document.getElementById('caisseUSDDisplay').innerText = "$" + netUSD.toFixed(2) + " USD";
+      document.getElementById('usdEntrees').innerText = "+$" + caisseUSDEntrees.toFixed(2);
+      document.getElementById('usdSorties').innerText = "-$" + caisseUSDSorties.toFixed(2);
+
+      calculateEcartHTG();
+      calculateEcartUSD();
+    }
+
+    function calculateEcartHTG() {
+      const theoretical = caisseHTGEntrees - caisseHTGSorties;
+      const realVal = parseFloat(document.getElementById('realHTGInput').value);
+      const badge = document.getElementById('ecartHTGBadge');
+      const valElem = document.getElementById('ecartHTGValue');
+
+      if (isNaN(realVal)) {
+        badge.className = "ecart-badge ecart-zero";
+        valElem.innerText = "0.00 HTG";
+        return;
+      }
+
+      const ecart = realVal - theoretical;
+      valElem.innerText = (ecart >= 0 ? "+" : "") + ecart.toFixed(2) + " HTG";
+
+      if (Math.abs(ecart) < 0.01) badge.className = "ecart-badge ecart-zero";
+      else if (ecart < 0) badge.className = "ecart-badge ecart-negative";
+      else badge.className = "ecart-badge ecart-positive";
+    }
+
+    function calculateEcartUSD() {
+      const theoretical = caisseUSDEntrees - caisseUSDSorties;
+      const realVal = parseFloat(document.getElementById('realUSDInput').value);
+      const badge = document.getElementById('ecartUSDBadge');
+      const valElem = document.getElementById('ecartUSDValue');
+
+      if (isNaN(realVal)) {
+        badge.className = "ecart-badge ecart-zero";
+        valElem.innerText = "$0.00 USD";
+        return;
+      }
+
+      const ecart = realVal - theoretical;
+      valElem.innerText = (ecart >= 0 ? "+$" : "-$") + Math.abs(ecart).toFixed(2) + " USD";
+
+      if (Math.abs(ecart) < 0.01) badge.className = "ecart-badge ecart-zero";
+      else if (ecart < 0) badge.className = "ecart-badge ecart-negative";
+      else badge.className = "ecart-badge ecart-positive";
+    }
+
+    function addLogEntry(data) {
+      transactionsData.push(data);
+      const time = new Date().toLocaleTimeString();
+      const row = `<tr>
+        <td>${data.ref}</td>
+        <td>${time}</td>
+        <td><strong>${data.service}</strong></td>
+        <td>${data.typeInfo}</td>
+        <td>${data.montantHTG ? data.montantHTG + " HTG" : "-"}</td>
+        <td>${data.montantUSD ? "$" + data.montantUSD + " USD" : "-"}</td>
+        <td>${data.auteurOrClient || "-"}</td>
+        <td>${data.cashier.name}<br><small style="color:var(--text-muted);">${data.cashier.email}</small></td>
+        <td><span style="color: ${data.status === 'Validé' ? '#16a34a' : '#d97706'}; font-weight: bold;">${data.status}</span></td>
+      </tr>`;
+      document.getElementById('transactionLog').innerHTML += row;
+      document.getElementById('fullTransactionLog').innerHTML += row;
+      updateRapport();
+    }
+
+    // Calculs et mise à jour des Cartes de Synthèse
+    function updateRapport() {
+      const tauxBRH = parseFloat(document.getElementById('tauxBRH').value) || 132.50;
+
+      // Unitransfer
+      const uni = transactionsData.filter(t => t.service === 'Unitransfer' && t.status === 'Validé');
+      const uniPaye = uni.filter(t => t.type === 'Paiement').reduce((acc, t) => acc + t.montantHTG, 0);
+      const uniEnvoye = uni.filter(t => t.type === 'Envoi').reduce((acc, t) => acc + t.montantHTG, 0);
+      document.getElementById('uniVol').innerText = uni.length;
+      document.getElementById('uniTotalPaye').innerText = uniPaye.toFixed(2) + " HTG";
+      document.getElementById('uniTotalEnvoye').innerText = uniEnvoye.toFixed(2) + " HTG";
+      document.getElementById('uniFonds70').innerText = (uniPaye * 0.70).toFixed(2) + " HTG";
+      document.getElementById('uniFonds30').innerText = "$" + ((uniPaye * 0.30) / tauxBRH).toFixed(2) + " USD";
+
+      // CAM
+      const cam = transactionsData.filter(t => t.service === 'CAM' && t.status === 'Validé');
+      const camPaye = cam.filter(t => t.type === 'Paiement').reduce((acc, t) => acc + t.montantHTG, 0);
+      const camEnvoye = cam.filter(t => t.type === 'Envoi').reduce((acc, t) => acc + t.montantHTG, 0);
+      document.getElementById('camVol').innerText = cam.length;
+      document.getElementById('camTotalPaye').innerText = camPaye.toFixed(2) + " HTG";
+      document.getElementById('camTotalEnvoye').innerText = camEnvoye.toFixed(2) + " HTG";
+      document.getElementById('camFonds70').innerText = (camPaye * 0.70).toFixed(2) + " HTG";
+      document.getElementById('camFonds30').innerText = "$" + ((camPaye * 0.30) / tauxBRH).toFixed(2) + " USD";
+
+      // Natcash
+      const nat = transactionsData.filter(t => t.service === 'Natcash' && t.status === 'Validé');
+      const natCredit = nat.filter(t => t.type === 'Dépôt').reduce((acc, t) => acc + t.montantHTG, 0);
+      const natDebit = nat.filter(t => t.type === 'Retrait').reduce((acc, t) => acc + t.montantHTG, 0);
+      const natCom = nat.reduce((acc, t) => acc + (t.commission || 0), 0);
+      document.getElementById('natCredit').innerText = natCredit.toFixed(2) + " HTG";
+      document.getElementById('natDebit').innerText = natDebit.toFixed(2) + " HTG";
+      document.getElementById('natCommissions').innerText = natCom.toFixed(2) + " HTG";
+
+      // Zelle
+      const zel = transactionsData.filter(t => t.service === 'Zelle' && t.status === 'Validé');
+      const zelEnvoye = zel.filter(t => t.type === 'Envoi').reduce((acc, t) => acc + t.montantUSD, 0);
+      const zelPaye = zel.filter(t => t.type === 'Paiement').reduce((acc, t) => acc + t.montantUSD, 0);
+      const zelOsmin = zel.filter(t => t.auteur === 'Osmin').reduce((acc, t) => acc + t.montantUSD, 0);
+      const zelOcgenor = zel.filter(t => t.auteur === 'Ocgénor').reduce((acc, t) => acc + t.montantUSD, 0);
+      document.getElementById('zelTotalEnvoye').innerText = "$" + zelEnvoye.toFixed(2) + " USD";
+      document.getElementById('zelTotalPaye').innerText = "$" + zelPaye.toFixed(2) + " USD";
+      document.getElementById('zelOsminTotal').innerText = "$" + zelOsmin.toFixed(2) + " USD";
+      document.getElementById('zelOcgenorTotal').innerText = "$" + zelOcgenor.toFixed(2) + " USD";
+
+      // Internes
+      const int = transactionsData.filter(t => t.service === 'Trans. Interne' && t.status === 'Validé');
+      const intEntreeHTG = int.filter(t => t.type === 'entree' && t.devise === 'HTG').reduce((acc, t) => acc + t.montant, 0);
+      const intEntreeUSD = int.filter(t => t.type === 'entree' && t.devise === 'USD').reduce((acc, t) => acc + t.montant, 0);
+      const intSortieHTG = int.filter(t => t.type === 'sortie' && t.devise === 'HTG').reduce((acc, t) => acc + t.montant, 0);
+      const intSortieUSD = int.filter(t => t.type === 'sortie' && t.devise === 'USD').reduce((acc, t) => acc + t.montant, 0);
+
+      document.getElementById('intTotalEntree').innerText = `${intEntreeHTG.toFixed(2)} HTG / $${intEntreeUSD.toFixed(2)} USD`;
+      document.getElementById('intTotalSortie').innerText = `${intSortieHTG.toFixed(2)} HTG / $${intSortieUSD.toFixed(2)} USD`;
+    }
+
+    // HANDLERS SAISIE SERVICES
+    function saveZelleTransaction(e) {
+      e.preventDefault();
+      const type = document.getElementById('zelType').value;
+      const montantUS = parseFloat(document.getElementById('zelMontantUS').value);
+      const taux = parseFloat(document.getElementById('tauxZelle').value);
+      const auteur = document.getElementById('zelAuteur').value;
+      const statut = document.getElementById('zelStatut').value;
+
+      if(statut === 'Validé') {
+        if(type === 'Envoi') caisseUSDEntrees += montantUS;
+        else caisseUSDSorties += montantUS;
+      }
+
+      addLogEntry({
+        ref: "ZEL-" + Math.floor(10000 + Math.random() * 90000),
+        service: "Zelle",
+        type: type,
+        typeInfo: `${type} (${auteur})`,
+        montantUSD: montantUS,
+        montantHTG: montantUS * taux,
+        auteur: auteur,
+        auteurOrClient: auteur,
+        cashier: currentCashier,
+        status: statut
+      });
+
+      updateCaisseDisplay();
+      closeModal('zelle');
+      e.target.reset();
+    }
+
+    function saveUnitransferTransaction(e) {
+      e.preventDefault();
+      const type = document.getElementById('uniType').value;
+      const refNum = document.getElementById('uniRefNum').value;
+      const montant = parseFloat(document.getElementById('uniMontant').value);
+      const statut = document.getElementById('uniStatut').value;
+
+      if(statut === 'Validé') {
+        if(type === 'Envoi') caisseHTGEntrees += montant;
+        else caisseHTGSorties += montant;
+      }
+
+      addLogEntry({
+        ref: refNum,
+        service: "Unitransfer",
+        type: type,
+        typeInfo: type,
+        montantHTG: montant,
+        cashier: currentCashier,
+        status: statut
+      });
+
+      updateCaisseDisplay();
+      closeModal('unitransfer');
+      e.target.reset();
+    }
+
+    function saveCamTransaction(e) {
+      e.preventDefault();
+      const type = document.getElementById('camType').value;
+      const refNum = document.getElementById('camRefNum').value;
+      const montant = parseFloat(document.getElementById('camMontant').value);
+      const statut = document.getElementById('camStatut').value;
+
+      if(statut === 'Validé') {
+        if(type === 'Envoi') caisseHTGEntrees += montant;
+        else caisseHTGSorties += montant;
+      }
+
+      addLogEntry({
+        ref: refNum,
+        service: "CAM",
+        type: type,
+        typeInfo: type,
+        montantHTG: montant,
+        cashier: currentCashier,
+        status: statut
+      });
+
+      updateCaisseDisplay();
+      closeModal('cam');
+      e.target.reset();
+    }
+
+    function saveNatcashTransaction(e) {
+      e.preventDefault();
+      const type = document.getElementById('natType').value;
+      const client = document.getElementById('natClient').value;
+      const montant = parseFloat(document.getElementById('natMontant').value);
+      const commission = parseFloat(document.getElementById('natCommission').value) || 0;
+      const statut = document.getElementById('natStatut').value;
+
+      if(statut === 'Validé') {
+        if(type === 'Dépôt') caisseHTGEntrees += montant;
+        else caisseHTGSorties += montant;
+      }
+
+      addLogEntry({
+        ref: "NAT-" + Math.floor(10000 + Math.random() * 90000),
+        service: "Natcash",
+        type: type,
+        typeInfo: `${type}`,
+        montantHTG: montant,
+        commission: commission,
+        auteurOrClient: client,
+        cashier: currentCashier,
+        status: statut
+      });
+
+      updateCaisseDisplay();
+      closeModal('natcash');
+      e.target.reset();
+    }
+
+    function saveInternalTransaction(e) {
+      e.preventDefault();
+      const type = document.getElementById('intType').value;
+      const motif = document.getElementById('intMotif').value;
+      const devise = document.getElementById('intDevise').value;
+      const montant = parseFloat(document.getElementById('intMontant').value);
+      const statut = document.getElementById('intStatut').value;
+
+      if(statut === 'Validé') {
+        if(type === 'entree') {
+          if(devise === 'HTG') caisseHTGEntrees += montant; else caisseUSDEntrees += montant;
+        } else {
+          if(devise === 'HTG') caisseHTGSorties += montant; else caisseUSDSorties += montant;
+        }
+      }
+
+      addLogEntry({
+        ref: "INT-" + Math.floor(10000 + Math.random() * 90000),
+        service: "Trans. Interne",
+        type: type,
+        devise: devise,
+        montant: montant,
+        typeInfo: `${type === 'entree' ? 'Entrée' : 'Sortie'} (${motif})`,
+        montantHTG: devise === 'HTG' ? montant : null,
+        montantUSD: devise === 'USD' ? montant : null,
+        cashier: currentCashier,
+        status: statut
+      });
+
+      updateCaisseDisplay();
+      closeModal('internes');
+      e.target.reset();
+    }
+  </script>
+</body>
+</html>
