@@ -505,6 +505,9 @@
       line-height: 1;
     }
 
+    .flagsvg { width: 1.5em; height: 1em; vertical-align: -0.12em; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.18); margin-right: 4px; }
+    .flag-icon .flagsvg { width: 46px; height: 31px; margin: 0; border-radius: 4px; }
+
     .caisse-title-flag h3 {
       font-size: 16px;
       font-weight: 800;
@@ -998,8 +1001,8 @@
       body.print-hist th, body.print-hist td { padding: 4px 5px; }
       header, .user-banner, .bottom-bar, .site-footer, .no-print, .modal, .login-screen, .welcome-screen, .confirm-overlay { display: none !important; }
       body { background: #fff; padding: 0; }
-      .view-section { display: none !important; }
-      #view-cloture { display: block !important; }
+      .view-section:not(.active) { display: none !important; }
+      .view-section.active { display: block !important; }
       .print-only { display: block !important; }
       .clo-head { display: none !important; }
       .content { padding: 0; max-width: none; }
@@ -1286,13 +1289,17 @@
 
     <!-- 4. VUE RAPPORT DE SYNTHÈSE -->
     <div id="view-rapport" class="view-section">
+      <div class="print-only clo-print-head">
+        <strong>MOSEK MULTI SERVICES</strong>
+        <span>Trois-Rivières, Port-de-Paix, Haïti</span>
+      </div>
       <h2 class="section-title">Rapport de Synthèse par Service <span class="muted" id="rapLabel"></span></h2>
       <div class="set-card no-print">
         <div class="hist-filters">
           <div><label for="rapFrom">Du</label><input type="date" id="rapFrom"></div>
           <div><label for="rapTo">Au</label><input type="date" id="rapTo"></div>
         </div>
-        <div class="hist-actions"><button type="button" class="primary" onclick="runRapport()">Afficher</button><button type="button" onclick="rapToday()">Aujourd'hui</button></div>
+        <div class="hist-actions"><button type="button" class="primary" onclick="runRapport()">Afficher</button><button type="button" onclick="rapToday()">Aujourd'hui</button><button type="button" onclick="window.print()">Imprimer / PDF</button></div>
         <p class="muted" style="font-size:12px; margin-top:8px;">Un jour ou une période (6 mois maximum).</p>
       </div>
       <div id="rapMsg" class="info"></div>
@@ -1457,11 +1464,11 @@
 
       <div class="rapport-grid">
         <div class="clo-card">
-          <div class="clo-card-head"><h3>🇭🇹 RAPPORT DE CLÔTURE</h3><span class="clo-cur">GOURDES (HTG)</span></div>
+          <div class="clo-card-head"><h3><svg class="flagsvg" viewBox="0 0 30 20" aria-label="Haïti" role="img"><rect width="30" height="10" fill="#00209F"/><rect y="10" width="30" height="10" fill="#D21034"/><rect x="9" y="5.5" width="12" height="9" fill="#fff"/><path d="M15 7.2l3 5.6h-6z" fill="#1f8a3b"/></svg> RAPPORT DE CLÔTURE</h3><span class="clo-cur">GOURDES (HTG)</span></div>
           <div class="clo-body" id="cloHTG"></div>
         </div>
         <div class="clo-card usd">
-          <div class="clo-card-head"><h3>🇺🇸 RAPPORT DE CLÔTURE</h3><span class="clo-cur">DOLLARS (USD)</span></div>
+          <div class="clo-card-head"><h3><svg class="flagsvg" viewBox="0 0 30 20" aria-label="États-Unis" role="img"><rect width="30" height="20" fill="#fff"/><g fill="#B22234"><rect width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.15" width="30" height="1.54"/><rect y="9.23" width="30" height="1.54"/><rect y="12.3" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.46" width="30" height="1.54"/></g><rect width="12.5" height="10.8" fill="#3C3B6E"/><g fill="#fff"><circle cx="3" cy="2.6" r=".6"/><circle cx="6.2" cy="2.6" r=".6"/><circle cx="9.4" cy="2.6" r=".6"/><circle cx="4.6" cy="5.4" r=".6"/><circle cx="7.8" cy="5.4" r=".6"/><circle cx="3" cy="8.2" r=".6"/><circle cx="6.2" cy="8.2" r=".6"/><circle cx="9.4" cy="8.2" r=".6"/></g></svg> RAPPORT DE CLÔTURE</h3><span class="clo-cur">DOLLARS (USD)</span></div>
           <div class="clo-body" id="cloUSD"></div>
         </div>
       </div>
@@ -1478,7 +1485,7 @@
         <div class="caisse-box">
           <div class="caisse-box-header">
             <div class="caisse-title-flag">
-              <span class="flag-icon">🇭🇹</span>
+              <span class="flag-icon"><svg class="flagsvg" viewBox="0 0 30 20" aria-label="Haïti" role="img"><rect width="30" height="10" fill="#00209F"/><rect y="10" width="30" height="10" fill="#D21034"/><rect x="9" y="5.5" width="12" height="9" fill="#fff"/><path d="M15 7.2l3 5.6h-6z" fill="#1f8a3b"/></svg></span>
               <div>
                 <h3>Caisse Gourdes (HTG)</h3>
                 <p style="font-size: 11px; color: var(--text-muted);">Solde Théorique de Caisse</p>
@@ -1513,7 +1520,7 @@
         <div class="caisse-box">
           <div class="caisse-box-header">
             <div class="caisse-title-flag">
-              <span class="flag-icon">🇺🇸</span>
+              <span class="flag-icon"><svg class="flagsvg" viewBox="0 0 30 20" aria-label="États-Unis" role="img"><rect width="30" height="20" fill="#fff"/><g fill="#B22234"><rect width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.15" width="30" height="1.54"/><rect y="9.23" width="30" height="1.54"/><rect y="12.3" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.46" width="30" height="1.54"/></g><rect width="12.5" height="10.8" fill="#3C3B6E"/><g fill="#fff"><circle cx="3" cy="2.6" r=".6"/><circle cx="6.2" cy="2.6" r=".6"/><circle cx="9.4" cy="2.6" r=".6"/><circle cx="4.6" cy="5.4" r=".6"/><circle cx="7.8" cy="5.4" r=".6"/><circle cx="3" cy="8.2" r=".6"/><circle cx="6.2" cy="8.2" r=".6"/><circle cx="9.4" cy="8.2" r=".6"/></g></svg></span>
               <div>
                 <h3>Caisse Dollars (USD)</h3>
                 <p style="font-size: 11px; color: var(--text-muted);">Solde Théorique de Caisse</p>
