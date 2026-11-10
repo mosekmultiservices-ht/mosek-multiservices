@@ -238,6 +238,12 @@
       outline: none;
     }
 
+    .rate-publish { margin-top: 3px; border: 1px solid #1e3a8a; background: #eff6ff; color: #1e3a8a; border-radius: 6px; font-size: 10px; font-weight: 700; padding: 2px 6px; cursor: pointer; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .chip { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: 4px 6px 4px 10px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    .chip button { border: none; background: transparent; color: #6366f1; cursor: pointer; font-size: 12px; padding: 0 4px; }
+    .chip-add { display: flex; gap: 6px; }
+    .chip-add input { flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; min-width: 0; }
     .rate-refresh {
       border: none;
       background: var(--primary-blue);
@@ -392,7 +398,7 @@
     }
 
     @media (max-width: 700px) {
-      header { padding: 12px 16px; }
+      header { padding: 12px 16px; position: static; }
       .agency-info h1 { font-size: 18px; }
       .turtle-logo-wrapper { width: 62px; height: 62px; }
       .dropdown-menu-container { left: 12px; }
@@ -894,6 +900,8 @@
     /* ===== Firebase : bannière, actions, paramètres ===== */
     #netBanner { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 5000; background: #b91c1c; color: #fff; text-align: center; font-size: 13px; font-weight: 700; padding: 8px 12px; }
     #netBanner.show { display: block; }
+    #netBanner.warn { background: #b45309; }
+    .pend-note { display: block; font-size: 11px; color: #b45309; margin-top: 3px; font-weight: 700; }
     .row-actions { display: flex; flex-direction: column; gap: 4px; min-width: 84px; }
     .btn-mini { border: 1px solid var(--border-color); background: #fff; color: var(--text-main); border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
     .btn-mini.warn { color: #b45309; border-color: #fcd34d; background: #fffbeb; }
@@ -1097,6 +1105,7 @@
           <label>BRH <button type="button" class="rate-refresh" onclick="fetchBRHRate(true)" title="Actualiser le taux">↻</button></label>
           <input type="number" step="0.01" id="tauxBRH" value="132.50" oninput="onBRHManualEdit()">
           <div class="rate-status" id="brhStatus">Recherche…</div>
+          <button type="button" id="brhPublish" class="rate-publish" style="display:none;" onclick="publishTaux()">Publier pour tous</button>
         </div>
       </div>
     </div>
@@ -1277,7 +1286,16 @@
 
     <!-- 4. VUE RAPPORT DE SYNTHÈSE -->
     <div id="view-rapport" class="view-section">
-      <h2 class="section-title">Rapport de Synthèse par Service <span class="muted day-label"></span></h2>
+      <h2 class="section-title">Rapport de Synthèse par Service <span class="muted" id="rapLabel"></span></h2>
+      <div class="set-card no-print">
+        <div class="hist-filters">
+          <div><label for="rapFrom">Du</label><input type="date" id="rapFrom"></div>
+          <div><label for="rapTo">Au</label><input type="date" id="rapTo"></div>
+        </div>
+        <div class="hist-actions"><button type="button" class="primary" onclick="runRapport()">Afficher</button><button type="button" onclick="rapToday()">Aujourd'hui</button></div>
+        <p class="muted" style="font-size:12px; margin-top:8px;">Un jour ou une période (6 mois maximum).</p>
+      </div>
+      <div id="rapMsg" class="info"></div>
 
       <div class="rapport-grid">
 
@@ -1374,8 +1392,7 @@
             </div>
           </div>
           <div class="highlight-box" style="margin-top: 0;">
-            <div class="metric-row"><span class="metric-label">Total Ordonné par Osmin</span><span class="metric-value" style="color: #6b21a8;" id="zelOsminTotal">$0,00 USD</span></div>
-            <div class="metric-row"><span class="metric-label">Total Ordonné par Ocgénor</span><span class="metric-value" style="color: #0284c7;" id="zelOcgenorTotal">$0,00 USD</span></div>
+            <div id="zelOrdRows"></div>
             <div class="metric-row"><span class="metric-label">Total général</span><span class="metric-value" id="zelOrdTotal">$0,00 USD</span></div>
           </div>
         </div>
@@ -1418,11 +1435,19 @@
     <div id="view-cloture" class="view-section">
       <div class="clo-head">
         <div>
-          <h2 class="section-title" style="margin-bottom: 4px;">Rapport de clôture de caisse <span class="muted day-label"></span></h2>
+          <h2 class="section-title" style="margin-bottom: 4px;">Rapport de clôture de caisse <span class="muted" id="cloLabel"></span></h2>
           <div class="muted" style="font-size: 12px;" id="cloMeta"></div>
         </div>
         <button type="button" class="btn-print no-print" onclick="window.print()">🖨️ Imprimer / PDF</button>
       </div>
+
+      <div class="set-card no-print">
+        <div class="hist-filters">
+          <div><label for="cloDate">Date du rapport</label><input type="date" id="cloDate"></div>
+        </div>
+        <div class="hist-actions"><button type="button" class="primary" onclick="runCloture()">Afficher</button><button type="button" onclick="cloToday()">Aujourd'hui</button></div>
+      </div>
+      <div id="cloMsg" class="info"></div>
 
       <div class="print-only clo-print-head">
         <strong>MOSEK MULTI SERVICES</strong>
@@ -1520,6 +1545,19 @@
         </div>
 
       </div>
+
+      <div class="set-card no-print" id="bilanSave">
+        <h3>Enregistrer le comptage du jour</h3>
+        <p class="muted" style="font-size:12px; margin-bottom:10px;">Enregistre les montants comptés ci-dessus avec le solde du système et l'écart, pour les consulter plus tard.</p>
+        <div class="hist-actions"><button type="button" class="primary" id="bilanSaveBtn" onclick="saveBilan()">Enregistrer le comptage</button></div>
+        <div id="bilMsg" class="info" style="margin-top:8px;"></div>
+      </div>
+      <div class="set-card no-print">
+        <h3>Consulter un comptage passé</h3>
+        <div class="hist-filters"><div><label for="bilDate">Date</label><input type="date" id="bilDate"></div></div>
+        <div class="hist-actions"><button type="button" class="primary" onclick="showBilan()">Afficher</button></div>
+        <div id="bilResult" style="margin-top:10px;"></div>
+      </div>
     </div>
 
     <!-- 6. VUE PARAMETRES -->
@@ -1543,6 +1581,18 @@
             <button type="button" class="btn-mini warn" style="padding:9px 14px; font-size:13px;" onclick="adminAddAllowed()">Ajouter</button>
           </div>
           <div class="set-table-wrap"><table class="set-table"><thead><tr><th>E-mail</th><th>Nom</th><th>Rôle</th><th>Compte</th><th></th></tr></thead><tbody id="allowedList"></tbody></table></div>
+        </div>
+        <div class="set-card">
+          <h3>Listes modifiables</h3>
+          <p class="muted" style="font-size:12px; margin-bottom:10px;">Ces listes alimentent les menus déroulants de tous les appareils. Retirer un élément ne modifie pas les anciennes opérations.</p>
+          <div id="listesAdmin"></div>
+        </div>
+        <div class="set-card">
+          <h3>Sauvegarde mensuelle</h3>
+          <p class="muted" style="font-size:12px; margin-bottom:10px;">Télécharge toutes les opérations, soldes d'ouverture et comptages d'un mois. Gardez le fichier hors du téléphone (e-mail, Drive…).</p>
+          <div class="set-form" style="grid-template-columns: 1fr;"><input type="month" id="bkMonth"></div>
+          <div class="hist-actions"><button type="button" class="primary" onclick="runBackup('json')">Télécharger la sauvegarde</button><button type="button" onclick="runBackup('csv')">Version Excel (opérations)</button></div>
+          <p id="bkInfo" class="muted" style="font-size:12px; margin-top:10px;"></p>
         </div>
         <div class="set-card">
           <h3>Comptes créés</h3>
@@ -1784,10 +1834,13 @@
     let openings = {};           // solde d'ouverture enregistré : { 'AAAA-MM-JJ': { HTG, USD, manuel } }
     let carry = { HTG: 0, USD: 0 }; // fermeture du dernier jour précédent (en centimes)
 
-    const motifs = {
-      entree: ["Renflouement", "Remboursement", "Retrait à la banque", "Retour de fonds", "Recettes diverses"],
-      sortie: ["Dépenses", "Payroll (Salaires)", "Frais de fonctionnement", "Dettes", "Avance sur salaire", "Achat fournitures"]
+    // Listes modifiables par l'administrateur (Paramètres). Valeurs de départ si rien n'est encore enregistré.
+    const DEFAULT_LISTES = {
+      motifsEntree: ["Renflouement", "Remboursement", "Retrait à la banque", "Retour de fonds", "Recettes diverses"],
+      motifsSortie: ["Dépenses", "Payroll (Salaires)", "Frais de fonctionnement", "Dettes", "Avance sur salaire", "Achat fournitures"],
+      ordonnateurs: ["Ocgénor", "Osmin"]
     };
+    let listes = JSON.parse(JSON.stringify(DEFAULT_LISTES));
     const SERVICES = ['Zelle USD', 'Zelle HTG', 'Unitransfer', 'CAM', 'Natcash', 'Change', 'Trans. Interne'];
 
     // ===== Utilitaires =====
@@ -1817,18 +1870,34 @@
     }
 
     // ===== Jour courant =====
+    // Heure de référence = heure du serveur Firebase (corrigée de l'écart avec l'appareil), jour calculé en heure d'Haïti.
+    const HT_TZ = 'America/Port-au-Prince';
+    let clockOffset = 0, clockSynced = false;
+    const nowD = () => new Date(Date.now() + clockOffset);
     function todayStr() {
-      const d = new Date();
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      return new Intl.DateTimeFormat('en-CA', { timeZone: HT_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(nowD());
+    }
+    async function syncClock(timeoutMs) {
+      if (!window.FB || !loggedIn || !currentCashier.uid) return false;
+      try {
+        const r = await Promise.race([FB.serverTime(currentCashier.uid), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs || 8000))]);
+        clockOffset = r.server - r.local; clockSynced = true;
+        updateNetStatus(); ensureToday();
+        return true;
+      } catch (err) { clockSynced = false; updateNetStatus(); return false; }
     }
     let currentDay = todayStr();
     const todayTx = () => transactionsData.filter(t => t.day === currentDay);
     const validToday = service => todayTx().filter(t => t.service === service && t.status === 'Validé');
+    // Vues par date : null = aujourd'hui (temps réel) ; sinon données chargées pour la date ou la période choisie
+    let rapView = null, cloView = null;
+    const repValid = service => (rapView ? rapView.ops : todayTx()).filter(t => t.service === service && t.status === 'Validé');
 
-    function dayLabel() {
-      const [y, m, d] = currentDay.split('-').map(Number);
+    function dayLabelOf(day) {
+      const [y, m, d] = day.split('-').map(Number);
       return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     }
+    const dayLabel = () => dayLabelOf(currentDay);
 
     // Nouveau jour : journal et totaux repartent à blanc, l'ouverture vient de la fermeture de la veille.
     function ensureToday() {
@@ -1838,6 +1907,8 @@
       document.getElementById('realHTGInput').value = '';
       document.getElementById('realUSDInput').value = '';
       transactionsData = []; openings = {};
+      rapView = null; cloView = null;
+      if (sharedTaux && sharedTaux.jour !== t) { sharedTaux = null; applySharedTaux(); }
       refreshAll();
       if (loggedIn) startDayData();
     }
@@ -1857,13 +1928,14 @@
     // La vérification se fait sur tous les jours, directement dans la base partagée.
     async function isDuplicateTransfer(service, ref) {
       const found = await FB.findTransfers(service, ref);
-      return found.some(t => t.status !== 'Annulé' && t.status !== 'Refusé');
+      const local = transactionsData.filter(t => t.service === service && String(t.ref).toUpperCase() === ref.toUpperCase());
+      return found.concat(local).some(t => t.status !== 'Annulé' && t.status !== 'Refusé');
     }
 
     function updateClock() {
-      const now = new Date();
-      document.getElementById('liveClock').innerText = now.toLocaleTimeString('fr-FR');
-      document.getElementById('liveDate').innerText = now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const now = nowD();
+      document.getElementById('liveClock').innerText = now.toLocaleTimeString('fr-FR', { timeZone: HT_TZ });
+      document.getElementById('liveDate').innerText = now.toLocaleDateString('fr-FR', { timeZone: HT_TZ, weekday: 'short', day: 'numeric', month: 'short' });
     }
     setInterval(() => { updateClock(); ensureToday(); updateChangeClock(); }, 1000);
     updateClock();
@@ -1899,7 +1971,32 @@
       updateRapport();
     }
 
+    // Taux du jour publié par l'administrateur : identique pour tous les appareils
+    let sharedTaux = null;
+    function applySharedTaux() {
+      const inp = document.getElementById('tauxBRH');
+      document.getElementById('brhPublish').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
+      if (sharedTaux) {
+        inp.value = parseFloat(sharedTaux.brh).toFixed(2);
+        inp.readOnly = currentRole !== 'admin';
+        brhManual = false;
+        setBRHStatus('Taux du jour • ' + (sharedTaux.par || 'admin'), 'ok');
+        updateRapport();
+      } else {
+        inp.readOnly = false;
+        if (loggedIn) fetchBRHRate(false);
+      }
+    }
+    async function publishTaux() {
+      if (currentRole !== 'admin') return;
+      const v = parseFloat(document.getElementById('tauxBRH').value);
+      if (!(v > 0)) { alert('Taux invalide.'); return; }
+      if (!confirm('Publier ' + fmt(v) + ' HTG pour 1 USD comme taux du jour pour tous les caissiers ?')) return;
+      try { await FB.setConfig('taux', { brh: round2(v), jour: todayStr(), par: currentCashier.name, at: nowD().toISOString() }); }
+      catch (err) { alert('Publication impossible : ' + friendlyError(err)); }
+    }
     async function fetchBRHRate(force) {
+      if (sharedTaux && !(force && currentRole === 'admin')) return;
       if (brhManual && !force) return;
       setBRHStatus('Recherche…', '');
       try {
@@ -1908,12 +2005,14 @@
         const data = await res.json();
         const rate = data && data.rates && data.rates.HTG;
         if (!rate) throw new Error('Taux HTG absent');
+        if (sharedTaux && !(force && currentRole === 'admin')) return; // un taux du jour a été publié entre-temps
         document.getElementById('tauxBRH').value = parseFloat(rate).toFixed(2);
         brhManual = false;
-        const heure = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        setBRHStatus('Auto • ' + heure, 'ok');
+        const heure = nowD().toLocaleTimeString('fr-FR', { timeZone: HT_TZ, hour: '2-digit', minute: '2-digit' });
+        setBRHStatus('Auto (marché) • ' + heure + ' — à vérifier', 'ok');
         updateRapport();
       } catch (err) {
+        if (sharedTaux && !(force && currentRole === 'admin')) return;
         setBRHStatus('Auto indisponible : saisir', 'err');
       }
     }
@@ -1940,6 +2039,9 @@
       document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewName).classList.add('active');
       if (viewName === 'historique') initHistory();
+      if (viewName === 'rapport' || viewName === 'cloture' || viewName === 'bilan') initReportControls();
+      if (viewName === 'bilan') document.getElementById('bilanSave').style.display = currentRole === 'dirigeant' ? 'none' : 'block';
+      if (viewName === 'parametres' && currentRole === 'admin') { renderListesAdmin(); renderBackupInfo(); const bm = document.getElementById('bkMonth'); if (!bm.value) bm.value = todayStr().slice(0, 7); }
       if (item) {
         item.classList.add('active');
         document.getElementById('pageLabel').innerText = item.dataset.label || '';
@@ -2055,11 +2157,30 @@
       } catch (err) { alert('Envoi impossible : ' + friendlyError(err)); }
     }
 
-    function showBanner(msg) {
+    // Bandeau d'état : erreur (rouge) ou avertissement (orange : hors ligne, opérations en attente d'envoi, heure non vérifiée)
+    let bannerErr = '';
+    const pendingCount = () => transactionsData.filter(t => t._pending).length;
+    function updateNetStatus() {
       const b = document.getElementById('netBanner');
+      let msg = bannerErr, warn = false;
+      if (!msg && loggedIn) {
+        const n = pendingCount();
+        if (navigator.onLine === false) {
+          msg = 'Hors ligne : vos opérations sont gardées sur cet appareil et partiront au retour d\'internet.' + (n ? ' (' + n + ' en attente d\'envoi)' : '');
+          warn = true;
+        } else if (n) {
+          msg = n + ' opération' + (n > 1 ? 's' : '') + ' en attente d\'envoi…'; warn = true;
+        } else if (!clockSynced) {
+          msg = "Heure du serveur non vérifiée : l'heure de l'appareil est utilisée."; warn = true;
+        }
+      }
       b.innerText = msg || '';
       b.classList.toggle('show', !!msg);
+      b.classList.toggle('warn', !!msg && warn);
     }
+    function showBanner(msg) { bannerErr = msg || ''; updateNetStatus(); }
+    window.addEventListener('online', () => { updateNetStatus(); syncClock(8000); });
+    window.addEventListener('offline', updateNetStatus);
 
     // ---- Réponse de Firebase : le site est prêt
     window.onFirebaseReady = function () {
@@ -2091,6 +2212,15 @@
       setLoginMsg('Serveur injoignable. Vérifiez votre connexion internet puis rechargez la page.');
     };
 
+    // Déconnexion automatique après inactivité (sauf s'il reste des opérations à envoyer)
+    const IDLE_MIN = 15;
+    let lastActivity = Date.now();
+    ['click', 'keydown', 'touchstart', 'scroll', 'mousemove'].forEach(ev => window.addEventListener(ev, () => { lastActivity = Date.now(); }, { passive: true }));
+    setInterval(() => {
+      if (loggedIn && !document.body.classList.contains('locked') && Date.now() - lastActivity > IDLE_MIN * 60000 && !pendingCount()) confirmLogout(true);
+    }, 15000);
+    setInterval(() => { if (loggedIn) syncClock(8000); }, 10 * 60000);
+
     function enterSession(user, p) {
       if (loggedIn && currentCashier.uid === user.uid) return;
       currentRole = ROLES[p.role] ? p.role : 'dirigeant';
@@ -2105,7 +2235,15 @@
       setLoginMsg('');
       applyRoleUI();
       renderGreeting();
+      lastActivity = Date.now();
+      sharedTaux = null;
+      FB.watchConfig('listes', d => applyListes(d), () => {});
+      FB.watchConfig('taux', d => { sharedTaux = (d && d.jour === todayStr() && d.brh > 0) ? d : null; applySharedTaux(); }, () => {});
+      if (currentRole === 'admin') FB.watchConfig('sauvegarde', d => { lastBackup = d; renderBackupInfo(); }, () => {});
+      clockOffset = 0; clockSynced = false;
+      currentDay = todayStr();
       startDayData();
+      syncClock(6000);
       if (freshLogin) { freshLogin = false; showWelcome(); }
       else document.body.classList.remove('locked');
     }
@@ -2115,6 +2253,11 @@
       if (window.FB) FB.stopWatching();
       transactionsData = []; openings = {}; carry = { HTG: 0, USD: 0 };
       histAll = []; histReady = false;
+      rapView = null; cloView = null; lastBackup = null; sharedTaux = null;
+      listes = JSON.parse(JSON.stringify(DEFAULT_LISTES));
+      document.getElementById('tauxBRH').readOnly = false;
+      ['rapFrom', 'rapTo', 'cloDate', 'bilDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('bilResult').innerHTML = ''; setMsg('bilMsg', ''); setMsg('cloMsg', ''); setMsg('rapMsg', '');
       document.getElementById('histBody').innerHTML = '<tr class="empty-row"><td colspan="7">Choisissez une période puis touchez « Rechercher ».</td></tr>';
       document.getElementById('histTotals').innerHTML = '';
       showBanner('');
@@ -2132,6 +2275,7 @@
       const admin = currentRole === 'admin';
       ['HTG', 'USD'].forEach(d => { document.getElementById('open' + d + 'Input').readOnly = !admin; });
       document.getElementById('adminSettings').style.display = admin ? 'block' : 'none';
+      document.getElementById('brhPublish').style.display = admin ? 'inline-block' : 'none';
       document.getElementById('setName').innerText = currentCashier.name;
       document.getElementById('setEmail').innerText = currentCashier.email;
       document.getElementById('setRole').innerText = (ROLES[currentRole] || ROLES.caissier).badge;
@@ -2144,9 +2288,10 @@
       const fail = err => { showBanner('Lecture des données impossible : ' + friendlyError(err)); };
       FB.watchDay(day, list => {
         if (day !== currentDay) return;
-        showBanner('');
+        bannerErr = '';
         transactionsData = list.sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
         refreshAll();
+        updateNetStatus();
       }, fail);
       FB.watchSolde(day, sd => {
         if (day !== currentDay) return;
@@ -2184,7 +2329,7 @@
       if (!t || !canCancel(t)) { closeModal('cancel'); return; }
       const btn = document.getElementById('cancelBtn'); btn.disabled = true;
       try {
-        await FB.cancelOp(cancelId, { motif, par: currentCashier.name, uid: currentCashier.uid, at: new Date().toISOString() });
+        await FB.cancelOp(cancelId, { motif, par: currentCashier.name, uid: currentCashier.uid, at: nowD().toISOString() });
         closeModal('cancel');
       } catch (err) { alert("Annulation impossible : " + friendlyError(err)); }
       btn.disabled = false;
@@ -2254,8 +2399,8 @@
       document.getElementById('welcomeSub').innerText = sub;
       w.classList.remove('fade');
       w.classList.add('show');
-      setTimeout(() => { if (onFade) onFade(); w.classList.add('fade'); }, 2400);
-      setTimeout(() => { w.classList.remove('show', 'fade'); if (onDone) onDone(); }, 2900);
+      setTimeout(() => { if (onFade) onFade(); w.classList.add('fade'); }, 2500);
+      setTimeout(() => { w.classList.remove('show', 'fade'); if (onDone) onDone(); }, 3000);
     }
 
     function showWelcome() {
@@ -2266,14 +2411,18 @@
     // Déconnexion : on demande d'abord confirmation (Oui / Non)
     function askLogout() {
       document.getElementById('dropdownMenu').classList.remove('active');
+      const n = pendingCount();
+      if (n) { alert(n + " opération" + (n > 1 ? 's ne sont' : ' n\'est') + " pas encore envoyée" + (n > 1 ? 's' : '') + " (pas d'internet). Attendez le retour d'internet avant de vous déconnecter, sinon elles seraient perdues."); return; }
       openModal('logout');
     }
 
-    function confirmLogout() {
+    function confirmLogout(auto) {
       closeModal('logout');
       document.body.classList.add('locked');
       const rb = ROLES[currentRole] || ROLES.caissier;
-      showSplash(rb.byeHello + ', ' + currentCashier.name + ' !', rb.bye, null, () => {
+      const hello = auto === true ? 'Session fermée, ' + currentCashier.name : rb.byeHello + ', ' + currentCashier.name + ' !';
+      const sub = auto === true ? "Déconnexion automatique après " + IDLE_MIN + " minutes d'inactivité." : rb.bye;
+      showSplash(hello, sub, null, () => {
         // la page de connexion apparaît sous l'écran d'au revoir pendant qu'il s'efface
         clearSession();
         setLoginMsg('');
@@ -2302,10 +2451,67 @@
       m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
     });
 
+    function fillOrdonnateurs() {
+      ['zuAuteur', 'zhAuteur'].forEach(id => {
+        const sel = document.getElementById(id), cur = sel.value;
+        sel.innerHTML = listes.ordonnateurs.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+        if (listes.ordonnateurs.includes(cur)) sel.value = cur;
+      });
+    }
+    function cleanList(arr, fallback) {
+      if (!Array.isArray(arr)) return fallback.slice();
+      const out = [];
+      arr.forEach(x => { const v = String(x == null ? '' : x).trim().slice(0, 60); if (v && !out.includes(v)) out.push(v); });
+      return out.slice(0, 50);
+    }
+    function applyListes(d) {
+      d = d || {};
+      listes = {
+        motifsEntree: cleanList(d.motifsEntree, DEFAULT_LISTES.motifsEntree),
+        motifsSortie: cleanList(d.motifsSortie, DEFAULT_LISTES.motifsSortie),
+        ordonnateurs: cleanList(d.ordonnateurs, DEFAULT_LISTES.ordonnateurs)
+      };
+      ['motifsEntree', 'motifsSortie', 'ordonnateurs'].forEach(k => { if (!listes[k].length) listes[k] = DEFAULT_LISTES[k].slice(); });
+      fillOrdonnateurs();
+      updateInternalMotifs(document.getElementById('intType').value === 'sortie' ? 'sortie' : 'entree');
+      renderListesAdmin();
+      updateRapport();
+    }
+    const LISTE_TITRES = { motifsEntree: "Motifs d'entrée (Transactions de caisse)", motifsSortie: 'Motifs de sortie (Transactions de caisse)', ordonnateurs: 'Ordonnateurs Zelle' };
+    function renderListesAdmin() {
+      const box = document.getElementById('listesAdmin');
+      if (!box) return;
+      box.innerHTML = Object.keys(LISTE_TITRES).map(k => `
+        <div style="margin-bottom:14px;">
+          <strong style="font-size:13px;">${esc(LISTE_TITRES[k])}</strong>
+          <div class="chips">${listes[k].map((v, i) => `<span class="chip">${esc(v)} <button type="button" aria-label="Retirer" onclick="listeRemove('${k}', ${i})">✕</button></span>`).join('')}</div>
+          <div class="chip-add"><input type="text" maxlength="60" id="add_${k}" placeholder="Ajouter…" onkeydown="if(event.key==='Enter'){event.preventDefault();listeAdd('${k}');}"><button type="button" class="btn-mini warn" onclick="listeAdd('${k}')">Ajouter</button></div>
+        </div>`).join('');
+    }
+    async function saveListes(next) {
+      try { await FB.setConfig('listes', next); }
+      catch (err) { alert('Enregistrement impossible : ' + friendlyError(err)); renderListesAdmin(); }
+    }
+    function listeAdd(k) {
+      if (currentRole !== 'admin') return;
+      const v = document.getElementById('add_' + k).value.trim().slice(0, 60);
+      if (!v) return;
+      if (listes[k].includes(v)) { alert('Cet élément existe déjà.'); return; }
+      const next = JSON.parse(JSON.stringify(listes)); next[k].push(v);
+      saveListes(next);
+    }
+    function listeRemove(k, i) {
+      if (currentRole !== 'admin') return;
+      if (listes[k].length <= 1) { alert('Une liste doit garder au moins un élément.'); return; }
+      if (!confirm('Retirer « ' + listes[k][i] + ' » de la liste ? Les anciennes opérations ne changent pas.')) return;
+      const next = JSON.parse(JSON.stringify(listes)); next[k].splice(i, 1);
+      saveListes(next);
+    }
+
     function updateInternalMotifs(type) {
       const select = document.getElementById('intMotif');
       select.innerHTML = '';
-      motifs[type].forEach(m => {
+      (type === 'entree' ? listes.motifsEntree : listes.motifsSortie).forEach(m => {
         const opt = document.createElement('option');
         opt.value = m;
         opt.textContent = m;
@@ -2370,10 +2576,10 @@
       catch (err) { alert("Impossible d'enregistrer le solde d'ouverture : " + friendlyError(err)); updateCaisseDisplay(); }
     }
 
-    function getCaisse() {
-      const o = openingOf(currentDay);
+    // Caisse d'une liste d'opérations avec un solde d'ouverture donné (en centimes)
+    function computeCaisse(list, o) {
       const f = { HTG: { in: 0, out: 0 }, USD: { in: 0, out: 0 } };
-      todayTx().filter(t => t.status === 'Validé').forEach(t => {
+      list.filter(t => t.status === 'Validé').forEach(t => {
         caisseEffects(t).forEach(e => {
           if (f[e.devise]) f[e.devise][e.sens > 0 ? 'in' : 'out'] += toCents(e.montant);
         });
@@ -2385,6 +2591,18 @@
         solde: (o[d] + f[d].in - f[d].out) / 100
       });
       return { HTG: mk('HTG'), USD: mk('USD') };
+    }
+    function getCaisse() { return computeCaisse(todayTx(), openingOf(currentDay)); }
+
+    // Solde d'ouverture d'un jour quelconque (en centimes)
+    async function openingForDay(day) {
+      if (day === currentDay) return openingOf(day);
+      const sd = await FB.getSolde(day);
+      if (sd) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD) };
+      const prev = await FB.getLatestSoldeBefore(day);
+      if (!prev) return { HTG: 0, USD: 0 };
+      const f = flowsOfList(await FB.getOpsOfDay(prev.day));
+      return { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD };
     }
 
     function updateCaisseDisplay() {
@@ -2475,7 +2693,8 @@
     }
 
     function annulNote(t) {
-      return t.annulation ? `<span class="annul-note">Annulé par ${esc(t.annulation.par)} : ${esc(t.annulation.motif)}</span>` : '';
+      return (t.annulation ? `<span class="annul-note">Annulé par ${esc(t.annulation.par)} : ${esc(t.annulation.motif)}</span>` : '')
+        + (t._pending ? '<span class="pend-note">⏳ en attente d\'envoi</span>' : '');
     }
     function rowActions(t) {
       const b = [];
@@ -2532,23 +2751,20 @@
 
     async function addLogEntry(data) {
       if (!window.FB || !loggedIn || currentRole === 'dirigeant') { alert("Enregistrement impossible : vous n'avez pas le droit d'enregistrer ou vous êtes déconnecté."); return false; }
+      if (!clockSynced && navigator.onLine !== false) await syncClock(4000);
       ensureToday();
-      data.ts = new Date().toISOString();
+      data.ts = nowD().toISOString();
       data.day = currentDay;
       data.uid = currentCashier.uid;
       data.cashier = { name: currentCashier.name, email: currentCashier.email };
-      try {
-        // Le solde d'ouverture du jour est figé au premier enregistrement (s'il existe déjà, on ignore l'erreur)
-        if (!openings[currentDay]) {
-          const o = openingOf(currentDay);
-          try { await FB.setSolde(currentDay, { HTG: o.HTG / 100, USD: o.USD / 100, manuel: false }); } catch (e1) { /* déjà créé par un autre appareil */ }
-        }
-        await FB.addOp(data);
-        return true;
-      } catch (err) {
-        alert("L'opération n'a PAS été enregistrée : " + friendlyError(err));
-        return false;
+      const day = currentDay;
+      // Les écritures partent dans l'ordre ; sans internet elles sont gardées sur l'appareil puis envoyées automatiquement.
+      if (!openings[day]) {
+        const o = openingOf(day);
+        FB.setSolde(day, { HTG: o.HTG / 100, USD: o.USD / 100, manuel: false }).catch(() => { /* déjà créé par un autre appareil */ });
       }
+      FB.addOp(data).catch(err => alert("L'opération " + data.ref + " n'a PAS été enregistrée : " + friendlyError(err)));
+      return true;
     }
 
     // ===== Historique =====
@@ -2560,8 +2776,7 @@
       histReady = true;
       const sel = document.getElementById('histService');
       sel.innerHTML = '<option value="">Tous</option>' + SERVICES.map(x => `<option value="${esc(x)}">${esc(SERVICE_NAMES[x] || x)}</option>`).join('');
-      const d = new Date();
-      document.getElementById('histFrom').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-01';
+      document.getElementById('histFrom').value = todayStr().slice(0, 8) + '01';
       document.getElementById('histTo').value = todayStr();
     }
 
@@ -2645,6 +2860,56 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     }
+    function opsCsvText(rows) {
+      const head = ['Référence', 'Date', 'Heure', 'Service', 'Type', 'Expéditeur', 'Bénéficiaire', 'Téléphone', 'Montant HTG', 'Montant USD', 'Taux', 'Commission', 'Caissier', 'Statut', 'Motif annulation'];
+      const lines = [head.map(csvCell).join(';')].concat(rows.map(t => {
+        const d = new Date(t.ts);
+        return [t.ref, d.toLocaleDateString('fr-FR', { timeZone: HT_TZ }), d.toLocaleTimeString('fr-FR', { timeZone: HT_TZ }), SERVICE_NAMES[t.service] || t.service, t.typeInfo, t.exp, t.ben, t.tel,
+          t.montantHTG, t.montantUSD, t.taux, t.commission, t.cashier && t.cashier.name, t.status, t.annulation && t.annulation.motif].map(csvCell).join(';');
+      }));
+      return '\ufeff' + lines.join('\r\n');
+    }
+    function downloadText(name, text, type) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], { type }));
+      a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    }
+    const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const moisLabel = m => { const [y, mm] = m.split('-').map(Number); return MOIS_FR[mm - 1] + ' ' + y; };
+    let lastBackup = null;
+    function renderBackupInfo() {
+      const el = document.getElementById('bkInfo');
+      if (!el) return;
+      const [y, m] = todayStr().split('-').map(Number);
+      const pm = m === 1 ? (y - 1) + '-12' : y + '-' + String(m - 1).padStart(2, '0');
+      let txt = lastBackup ? 'Dernière sauvegarde : ' + moisLabel(lastBackup.mois) + ' (' + lastBackup.nb + ' opérations), le ' + new Date(lastBackup.at).toLocaleDateString('fr-FR', { timeZone: HT_TZ }) + '.' : 'Aucune sauvegarde enregistrée pour l\'instant.';
+      if (!lastBackup || lastBackup.mois < pm) txt += ' ⚠️ Pensez à sauvegarder le mois de ' + moisLabel(pm) + '.';
+      el.innerText = txt;
+    }
+    async function runBackup(kind) {
+      if (currentRole !== 'admin') return;
+      const m = document.getElementById('bkMonth').value;
+      if (!/^\d{4}-\d{2}$/.test(m)) { alert('Choisissez le mois à sauvegarder.'); return; }
+      const [y, mm] = m.split('-').map(Number);
+      const from = m + '-01', to = m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0');
+      try {
+        const [ops, soldes, bilans] = await Promise.all([FB.getOpsRange(from, to), FB.getSoldesRange(from, to), FB.getBilansRange(from, to)]);
+        ops.sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
+        if (kind === 'csv') {
+          if (!ops.length) { alert('Aucune opération ce mois-là.'); return; }
+          downloadText('operations-mosek-' + m + '.csv', opsCsvText(ops), 'text/csv;charset=utf-8');
+          return;
+        }
+        const data = { application: 'Mosek Multi Services', exporteLe: nowD().toISOString(), exportePar: currentCashier.name, mois: m, operations: ops.map(o => { const c = Object.assign({}, o); delete c._pending; delete c.srvTs; return c; }), soldesOuverture: soldes, comptages: bilans };
+        downloadText('sauvegarde-mosek-' + m + '.json', JSON.stringify(data, null, 1), 'application/json');
+        lastBackup = { mois: m, at: nowD().toISOString(), nb: ops.length, par: currentCashier.name };
+        renderBackupInfo();
+        FB.setConfig('sauvegarde', lastBackup).catch(() => {});
+      } catch (err) { alert('Sauvegarde impossible : ' + friendlyError(err)); }
+    }
+
     function printHistory() {
       if (!histFiltered().length) { alert('Rien à imprimer : lancez une recherche.'); return; }
       document.body.classList.add('print-hist');
@@ -2658,9 +2923,10 @@
     function updateRapport() {
       const tauxBRH = getTauxBRH();
       const tauxZelle = getTauxZelle();
+      document.getElementById('rapLabel').innerText = '— ' + (rapView ? (rapView.from === rapView.to ? dayLabelOf(rapView.from) : 'du ' + rapView.from.split('-').reverse().join('/') + ' au ' + rapView.to.split('-').reverse().join('/')) : dayLabel());
 
       // Unitransfer
-      const uni = validToday('Unitransfer');
+      const uni = repValid('Unitransfer');
       const uniPaye = sumBy(uni.filter(t => t.type === 'Paiement'), t => t.montantHTG);
       const uniEnvoye = sumBy(uni.filter(t => t.type === 'Envoi'), t => t.montantHTG);
       document.getElementById('uniVol').innerText = uni.length;
@@ -2670,7 +2936,7 @@
       document.getElementById('uniFonds30').innerText = usd(round2((uniPaye * 0.30) / tauxBRH));
 
       // CAM
-      const cam = validToday('CAM');
+      const cam = repValid('CAM');
       const camPaye = sumBy(cam.filter(t => t.type === 'Paiement'), t => t.montantHTG);
       const camEnvoye = sumBy(cam.filter(t => t.type === 'Envoi'), t => t.montantHTG);
       document.getElementById('camVol').innerText = cam.length;
@@ -2680,19 +2946,19 @@
       document.getElementById('camFonds30').innerText = usd(round2((camPaye * 0.30) / tauxBRH));
 
       // Natcash
-      const nat = validToday('Natcash');
+      const nat = repValid('Natcash');
       document.getElementById('natCredit').innerText = htg(sumBy(nat.filter(t => t.type === 'Dépôt'), t => t.montantHTG));
       document.getElementById('natDebit').innerText = htg(sumBy(nat.filter(t => t.type === 'Retrait'), t => t.montantHTG));
       document.getElementById('natCommissions').innerText = htg(sumBy(nat, t => t.commission || 0));
 
       // Zelle USD
-      const zu = validToday('Zelle USD');
+      const zu = repValid('Zelle USD');
       document.getElementById('zuVol').innerText = zu.length;
       document.getElementById('zuTotalEnvoye').innerText = usd(sumBy(zu.filter(t => t.type === 'Envoi'), t => t.montantUSD));
       document.getElementById('zuTotalPaye').innerText = usd(sumBy(zu.filter(t => t.type === 'Paiement'), t => t.montantUSD));
 
       // Zelle HTG
-      const zh = validToday('Zelle HTG');
+      const zh = repValid('Zelle HTG');
       document.getElementById('zhVol').innerText = zh.length;
       document.getElementById('zhTotalEnvoye').innerText = htg(sumBy(zh.filter(t => t.type === 'Envoi'), t => t.montantHTG));
       document.getElementById('zhTotalPaye').innerText = htg(sumBy(zh.filter(t => t.type === 'Paiement'), t => t.montantHTG));
@@ -2700,14 +2966,19 @@
       // Zelle : montants ordonnés, tout en dollars (le montant USD de chaque opération Zelle HTG
       // vaut son montant HTG divisé par le taux : 26 000 HTG à 130 = 200 $)
       const zel = zu.concat(zh);
-      const osmin = sumBy(zel.filter(t => t.auteur === 'Osmin'), t => t.montantUSD);
-      const ocg = sumBy(zel.filter(t => t.auteur === 'Ocgénor'), t => t.montantUSD);
-      document.getElementById('zelOsminTotal').innerText = usd(osmin);
-      document.getElementById('zelOcgenorTotal').innerText = usd(ocg);
-      document.getElementById('zelOrdTotal').innerText = usd(round2(osmin + ocg));
+      const ordNames = [...listes.ordonnateurs];
+      zel.forEach(t => { if (t.auteur && !ordNames.includes(t.auteur)) ordNames.push(t.auteur); });
+      const ordColors = ['#6b21a8', '#0284c7', '#047857', '#be185d', '#b45309', '#4f46e5'];
+      let ordTotal = 0;
+      document.getElementById('zelOrdRows').innerHTML = ordNames.map((n, i) => {
+        const v = sumBy(zel.filter(t => t.auteur === n), t => t.montantUSD);
+        ordTotal += toCents(v);
+        return `<div class="metric-row"><span class="metric-label">Total Ordonné par ${esc(n)}</span><span class="metric-value" style="color: ${ordColors[i % ordColors.length]};">${usd(v)}</span></div>`;
+      }).join('');
+      document.getElementById('zelOrdTotal').innerText = usd(ordTotal / 100);
 
       // Change / Échange
-      const ch = validToday('Change');
+      const ch = repValid('Change');
       const achats = ch.filter(t => t.type === 'Achat');
       const ventes = ch.filter(t => t.type === 'Vente');
       const aU = sumBy(achats, t => t.montantUSD), aH = sumBy(achats, t => t.montantHTG);
@@ -2721,7 +2992,7 @@
       document.getElementById('chgVenteTaux').innerText = vU > 0 ? fmt(vH / vU) + ' HTG / USD' : '-';
 
       // Transactions internes
-      const int = validToday('Trans. Interne');
+      const int = repValid('Trans. Interne');
       const intSum = (type, devise) => sumBy(int.filter(t => t.type === type && t.devise === devise), t => t.montant);
       document.getElementById('intTotalEntree').innerText = `${htg(intSum('entree', 'HTG'))} / ${usd(intSum('entree', 'USD'))}`;
       document.getElementById('intTotalSortie').innerText = `${htg(intSum('sortie', 'HTG'))} / ${usd(intSum('sortie', 'USD'))}`;
@@ -2915,9 +3186,10 @@
     };
 
     function updateCloture() {
-      const c = getCaisse();
+      const list = cloView ? cloView.ops : todayTx();
+      const c = cloView ? computeCaisse(cloView.ops, cloView.open) : getCaisse();
       const acc = { HTG: {}, USD: {} };
-      todayTx().filter(t => t.status === 'Validé').forEach(t => {
+      list.filter(t => t.status === 'Validé').forEach(t => {
         caisseEffects(t).forEach(e => {
           if (!acc[e.devise]) return;
           const o = acc[e.devise][t.service] || (acc[e.devise][t.service] = { in: 0, out: 0 });
@@ -2949,23 +3221,93 @@
           <div class="clo-line final"><span>Solde de clôture</span><span style="color: ${solde < 0 ? 'var(--danger-red)' : 'inherit'};">${total(solde)}</span></div>`;
       });
 
-      const all = todayTx();
+      const all = list;
       const notCounted = all.filter(t => t.status !== 'Validé').length;
-      const now = new Date();
-      const meta = 'Situation au ' + now.toLocaleDateString('fr-FR') + ' à ' + now.toLocaleTimeString('fr-FR') + ' • Caissier : ' + currentCashier.name;
+      const now = nowD();
+      const shownDay = cloView ? cloView.day : currentDay;
+      const meta = cloView
+        ? 'Rapport du ' + dayLabelOf(cloView.day) + ' • Consulté par : ' + currentCashier.name
+        : 'Situation au ' + now.toLocaleDateString('fr-FR', { timeZone: HT_TZ }) + ' à ' + now.toLocaleTimeString('fr-FR', { timeZone: HT_TZ }) + ' • Caissier : ' + currentCashier.name;
+      document.getElementById('cloLabel').innerText = '— ' + dayLabelOf(shownDay);
       document.getElementById('cloMeta').innerText = meta;
-      document.getElementById('cloPrintMeta').innerText = 'Rapport de clôture de caisse — ' + dayLabel() + ' • ' + meta;
+      document.getElementById('cloPrintMeta').innerText = 'Rapport de clôture de caisse — ' + dayLabelOf(shownDay) + ' • ' + meta;
       document.getElementById('cloNote').innerText = 'Solde de clôture = solde d\'ouverture + crédit - débit. Seules les opérations validées sont comptées'
         + (notCounted ? ' (' + notCounted + ' opération' + (notCounted > 1 ? 's' : '') + ' en attente, refusée' + (notCounted > 1 ? 's' : '') + ' ou annulée' + (notCounted > 1 ? 's' : '') + ' non comptée' + (notCounted > 1 ? 's' : '') + ').' : '.');
+    }
+
+    // ===== Rapports par date =====
+    function setMsg(id, t, info) { const m = document.getElementById(id); m.innerText = t || ''; m.classList.toggle('info', !!info); }
+    function initReportControls() {
+      const t = todayStr();
+      ['rapFrom', 'rapTo', 'cloDate', 'bilDate'].forEach(id => { const el = document.getElementById(id); el.max = t; if (!el.value) el.value = t; });
+    }
+    async function runCloture() {
+      const day = document.getElementById('cloDate').value;
+      if (!day) { setMsg('cloMsg', 'Choisissez une date.'); return; }
+      if (day > todayStr()) { setMsg('cloMsg', 'Cette date est dans le futur.'); return; }
+      if (day === currentDay) { cloToday(); return; }
+      if (!window.FB || !loggedIn) { setMsg('cloMsg', 'Connexion au serveur indisponible.'); return; }
+      setMsg('cloMsg', 'Chargement…', true);
+      try {
+        const [ops, open] = await Promise.all([FB.getOpsOfDay(day), openingForDay(day)]);
+        cloView = { day, ops, open };
+        setMsg('cloMsg', ops.length ? '' : 'Aucune opération ce jour-là.', true);
+        updateCloture();
+      } catch (err) { setMsg('cloMsg', 'Chargement impossible : ' + friendlyError(err)); }
+    }
+    function cloToday() { cloView = null; document.getElementById('cloDate').value = todayStr(); setMsg('cloMsg', ''); updateCloture(); }
+    async function runRapport() {
+      const from = document.getElementById('rapFrom').value, to = document.getElementById('rapTo').value;
+      if (!from || !to) { setMsg('rapMsg', 'Choisissez la date de début et la date de fin.'); return; }
+      if (from > to) { setMsg('rapMsg', 'La date de début doit être avant la date de fin.'); return; }
+      if (to > todayStr()) { setMsg('rapMsg', 'La date de fin est dans le futur.'); return; }
+      if (daysBetween(from, to) > HIST_MAX_DAYS) { setMsg('rapMsg', 'Période trop longue : 6 mois maximum.'); return; }
+      if (from === currentDay && to === currentDay) { rapToday(); return; }
+      if (!window.FB || !loggedIn) { setMsg('rapMsg', 'Connexion au serveur indisponible.'); return; }
+      setMsg('rapMsg', 'Chargement…', true);
+      try {
+        rapView = { from, to, ops: await FB.getOpsRange(from, to) };
+        setMsg('rapMsg', rapView.ops.length ? '' : 'Aucune opération sur cette période.', true);
+        updateRapport();
+      } catch (err) { setMsg('rapMsg', 'Chargement impossible : ' + friendlyError(err)); }
+    }
+    function rapToday() { rapView = null; const t = todayStr(); document.getElementById('rapFrom').value = t; document.getElementById('rapTo').value = t; setMsg('rapMsg', ''); updateRapport(); }
+
+    // ===== Comptage physique enregistré =====
+    async function saveBilan() {
+      if (currentRole === 'dirigeant') return;
+      const h = parseFloat(document.getElementById('realHTGInput').value), u = parseFloat(document.getElementById('realUSDInput').value);
+      if (isNaN(h) && isNaN(u)) { setMsg('bilMsg', 'Tapez au moins un montant compté (HTG ou USD).'); return; }
+      const c = getCaisse();
+      const mk = (v, th) => isNaN(v) ? null : { compte: round2(v), theorique: th, ecart: round2(v - th) };
+      const data = { HTG: mk(h, c.HTG.solde), USD: mk(u, c.USD.solde), par: currentCashier.name, uid: currentCashier.uid, at: nowD().toISOString() };
+      setMsg('bilMsg', 'Enregistrement…', true);
+      try {
+        await FB.setBilan(currentDay, data);
+        setMsg('bilMsg', 'Comptage enregistré à ' + new Date(data.at).toLocaleTimeString('fr-FR', { timeZone: HT_TZ, hour: '2-digit', minute: '2-digit' }) + '. Un nouvel enregistrement le même jour remplace celui-ci.', true);
+      } catch (err) { setMsg('bilMsg', "Enregistrement impossible : " + friendlyError(err)); }
+    }
+    function bilanHtml(b, day) {
+      const row = (lab, x, f) => x ? `<tr><td>${lab}</td><td>${f(x.theorique)}</td><td>${f(x.compte)}</td><td style="font-weight:700;color:${Math.abs(x.ecart) < 0.01 ? 'inherit' : (x.ecart < 0 ? 'var(--danger-red)' : 'var(--success-green)')};">${(x.ecart >= 0 ? '+' : '-') + f(Math.abs(x.ecart))}</td></tr>` : '';
+      return `<p style="font-size:13px;margin-bottom:8px;"><strong>${esc(dayLabelOf(day))}</strong> • enregistré par ${esc(b.par)} à ${new Date(b.at).toLocaleTimeString('fr-FR', { timeZone: HT_TZ, hour: '2-digit', minute: '2-digit' })}</p>
+        <div class="set-table-wrap"><table class="set-table"><thead><tr><th>Devise</th><th>Solde système</th><th>Compté</th><th>Écart</th></tr></thead><tbody>${row('HTG', b.HTG, htg)}${row('USD', b.USD, usd)}</tbody></table></div>`;
+    }
+    async function showBilan() {
+      const day = document.getElementById('bilDate').value;
+      if (!day) { document.getElementById('bilResult').innerHTML = '<p class="muted">Choisissez une date.</p>'; return; }
+      try {
+        const b = await FB.getBilan(day);
+        document.getElementById('bilResult').innerHTML = b ? bilanHtml(b, day) : '<p class="muted" style="font-size:13px;">Aucun comptage enregistré pour cette date.</p>';
+      } catch (err) { document.getElementById('bilResult').innerHTML = '<p class="muted">Lecture impossible : ' + esc(friendlyError(err)) + '</p>'; }
     }
 
     // ===== Change / Échange =====
     function updateChangeClock() {
       const d = document.getElementById('chgDate');
       if (!d || !document.getElementById('modal-change').classList.contains('active')) return;
-      const now = new Date();
-      d.innerText = now.toLocaleDateString('fr-FR');
-      document.getElementById('chgHeure').innerText = now.toLocaleTimeString('fr-FR');
+      const now = nowD();
+      d.innerText = now.toLocaleDateString('fr-FR', { timeZone: HT_TZ });
+      document.getElementById('chgHeure').innerText = now.toLocaleTimeString('fr-FR', { timeZone: HT_TZ });
     }
 
     // Achat : montant entrant USD, puis montant sortant HTG. Vente : montant entrant HTG, puis montant sortant USD.
@@ -3074,18 +3416,23 @@
         const { initializeApp } = appM;
         const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
                 sendEmailVerification, sendPasswordResetEmail, signOut } = authM;
-        const { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection,
+        const { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, serverTimestamp, getDocFromServer,
+                doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection,
                 query, where, orderBy, limit, getDocs, onSnapshot } = fsM;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Cache durable : les opérations saisies sans internet sont gardées sur l'appareil et envoyées au retour du réseau
+        let db;
+        try { db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
+        catch (e) { db = getFirestore(app); }
         auth.languageCode = 'fr';
 
         let unsubOps = null, unsubSolde = null;
+        const unsubCfg = {};
         // Firestore refuse les valeurs "undefined" : on les retire avant d'enregistrer.
         const clean = o => JSON.parse(JSON.stringify(o));
-        const withId = d => Object.assign({}, d.data(), { id: d.id });
+        const withId = d => Object.assign({}, d.data(), { id: d.id, _pending: !!(d.metadata && d.metadata.hasPendingWrites) });
 
         window.FB = {
           // --- Connexion ---
@@ -3112,7 +3459,7 @@
           // --- Opérations du jour (temps réel) ---
           watchDay(day, onData, onError) {
             if (unsubOps) unsubOps();
-            unsubOps = onSnapshot(query(collection(db, 'operations'), where('day', '==', day)),
+            unsubOps = onSnapshot(query(collection(db, 'operations'), where('day', '==', day)), { includeMetadataChanges: true },
               snap => onData(snap.docs.map(withId)), onError);
           },
           async getOpsOfDay(day) {
@@ -3129,7 +3476,15 @@
               getDocs(query(collection(db, 'operations'), where('service', '==', service), where('ref', '==', v)))));
             return res.flatMap(s => s.docs.map(withId));
           },
-          addOp: data => addDoc(collection(db, 'operations'), clean(data)),
+          addOp: data => addDoc(collection(db, 'operations'), Object.assign(clean(data), { srvTs: serverTimestamp() })),
+          // Heure du serveur : on écrit un horodatage serveur puis on le relit
+          async serverTime(uid) {
+            const t0 = Date.now();
+            await setDoc(doc(db, 'horloge', uid), { t: serverTimestamp() });
+            const s = await getDocFromServer(doc(db, 'horloge', uid));
+            const t1 = Date.now();
+            return { server: s.data().t.toMillis(), local: (t0 + t1) / 2 };
+          },
           cancelOp: (id, annulation) => updateDoc(doc(db, 'operations', id), clean({ status: 'Annulé', annulation })),
           deleteOp: id => deleteDoc(doc(db, 'operations', id)),
 
@@ -3139,6 +3494,23 @@
             const s = await getDocs(query(collection(db, 'soldes'), where('day', '<', day), orderBy('day', 'desc'), limit(1)));
             return s.empty ? null : s.docs[0].data();
           },
+          async getSoldesRange(from, to) {
+            const s = await getDocs(query(collection(db, 'soldes'), where('day', '>=', from), where('day', '<=', to)));
+            return s.docs.map(d => d.data());
+          },
+          // --- Comptage physique de caisse (bilan) ---
+          async getBilan(day) { const s = await getDoc(doc(db, 'bilans', day)); return s.exists() ? s.data() : null; },
+          setBilan: (day, data) => setDoc(doc(db, 'bilans', day), clean(Object.assign({}, data, { day }))),
+          async getBilansRange(from, to) {
+            const s = await getDocs(query(collection(db, 'bilans'), where('day', '>=', from), where('day', '<=', to)));
+            return s.docs.map(d => d.data());
+          },
+          // --- Réglages partagés : listes, taux du jour, dernière sauvegarde ---
+          watchConfig(name, onData, onError) {
+            if (unsubCfg[name]) unsubCfg[name]();
+            unsubCfg[name] = onSnapshot(doc(db, 'config', name), s => onData(s.exists() ? s.data() : null), onError);
+          },
+          setConfig: (name, data) => setDoc(doc(db, 'config', name), clean(data)),
           setSolde: (day, data) => setDoc(doc(db, 'soldes', day), clean(Object.assign({}, data, { day }))),
           watchSolde(day, onData, onError) {
             if (unsubSolde) unsubSolde();
@@ -3147,6 +3519,7 @@
           stopWatching() {
             if (unsubOps) { unsubOps(); unsubOps = null; }
             if (unsubSolde) { unsubSolde(); unsubSolde = null; }
+            Object.keys(unsubCfg).forEach(k => { unsubCfg[k](); delete unsubCfg[k]; });
           }
         };
         if (window.onFirebaseReady) window.onFirebaseReady();
