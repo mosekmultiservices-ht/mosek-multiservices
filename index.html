@@ -505,8 +505,12 @@
       line-height: 1;
     }
 
-    .flagsvg { width: 1.5em; height: 1em; vertical-align: -0.12em; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.18); margin-right: 4px; }
-    .flag-icon .flagsvg { width: 46px; height: 31px; margin: 0; border-radius: 4px; }
+    .flagsvg { height: 1em; vertical-align: -0.12em; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.2); margin-right: 5px; }
+    .flagsvg.ht { width: 1.667em; }
+    .flagsvg.us { width: 1.9em; }
+    .flag-icon .flagsvg { height: 34px; margin: 0; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.12); }
+    .flag-icon .flagsvg.ht { width: 56.7px; }
+    .flag-icon .flagsvg.us { width: 64.6px; }
 
     .caisse-title-flag h3 {
       font-size: 16px;
@@ -1355,9 +1359,19 @@
           <div class="metric-row"><span class="metric-label">Total Crédit (Dépôts / Entrée Caisse)</span><span class="metric-value" style="color: var(--success-green);" id="natCredit">0,00 HTG</span></div>
           <div class="metric-row"><span class="metric-label">Total Débit (Retraits / Sortie Caisse)</span><span class="metric-value" style="color: var(--danger-red);" id="natDebit">0,00 HTG</span></div>
           <div class="metric-row"><span class="metric-label">Commissions Totales (Indicatif)</span><span class="metric-value" style="color: #d97706;" id="natCommissions">0,00 HTG</span></div>
+          <div class="highlight-box" style="margin-top: 12px;">
+            <div style="font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;">Compte Natcash de l'agence</div>
+            <div class="metric-row"><span class="metric-label">Solde d'ouverture Natcash</span><input type="number" step="0.01" min="0" id="natOpenInput" style="width: 130px; padding: 4px 8px; font-size: 13px; text-align: right;" onchange="saveOpeningNat(this.value)"></div>
+            <div class="metric-row"><span class="metric-label">+ Retraits clients (le compte augmente)</span><span class="metric-value" style="color: var(--success-green);" id="natRetraits">0,00 HTG</span></div>
+            <div class="metric-row"><span class="metric-label">+ Recharges du compte (sorties de caisse)</span><span class="metric-value" style="color: var(--success-green);" id="natRecharges">0,00 HTG</span></div>
+            <div class="metric-row"><span class="metric-label">− Dépôts clients (le compte diminue)</span><span class="metric-value" style="color: var(--danger-red);" id="natDepots">0,00 HTG</span></div>
+            <div class="metric-row"><span class="metric-label"><strong>Solde Natcash théorique</strong></span><span class="metric-value" style="color: #1e40af; font-size: 15px;" id="natTheo">0,00 HTG</span></div>
+          </div>
           <div class="count-input-group" style="margin-top: 12px; padding: 10px;">
-            <label style="font-size: 11px;">Solde actuel / disponible</label>
-            <input type="number" id="natBalancePhone" placeholder="0.00 HTG" style="padding: 6px 10px; font-size: 13px;">
+            <label style="font-size: 11px;" for="natBalancePhone">Solde Natcash réel (relevé du téléphone)</label>
+            <input type="number" step="0.01" min="0" id="natBalancePhone" placeholder="0.00 HTG" style="padding: 6px 10px; font-size: 13px;" oninput="updateNatEcart()">
+            <div class="metric-row" style="margin-top: 8px;"><span class="metric-label">Écart (réel − théorique)</span><span class="metric-value" id="natEcart">—</span></div>
+            <p class="muted" style="font-size: 11px; margin-top: 6px;">Le solde réel n'est pas enregistré : il sert à contrôler le calcul. Le solde d'ouverture est reporté automatiquement d'un jour à l'autre.</p>
           </div>
         </div>
 
@@ -1464,11 +1478,11 @@
 
       <div class="rapport-grid">
         <div class="clo-card">
-          <div class="clo-card-head"><h3><svg class="flagsvg" viewBox="0 0 30 20" aria-label="Haïti" role="img"><rect width="30" height="10" fill="#00209F"/><rect y="10" width="30" height="10" fill="#D21034"/><rect x="9" y="5.5" width="12" height="9" fill="#fff"/><path d="M15 7.2l3 5.6h-6z" fill="#1f8a3b"/></svg> RAPPORT DE CLÔTURE</h3><span class="clo-cur">GOURDES (HTG)</span></div>
+          <div class="clo-card-head"><h3><svg class="flagsvg ht" viewBox="0 0 50 30" aria-label="Haïti" role="img"><rect width="50" height="15" fill="#00209F"/><rect y="15" width="50" height="15" fill="#D21034"/><rect x="17" y="6.5" width="16" height="17" fill="#fff"/><g fill="#444"><rect x="18.6" y="19.3" width="5" height="1.1" rx=".5" transform="rotate(-14 21 19.8)"/><rect x="26.4" y="19.3" width="5" height="1.1" rx=".5" transform="rotate(14 29 19.8)"/></g><g fill="#222"><circle cx="23.4" cy="21" r=".55"/><circle cx="26.6" cy="21" r=".55"/><circle cx="25" cy="20.3" r=".55"/></g><g transform="translate(25 18.6) rotate(-66)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="-2.3" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="-2.3" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(-48)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="-2.3" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="-2.3" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(-30)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="-2.3" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="-2.3" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(30)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="0" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="0" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(48)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="0" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="0" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(66)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="0" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="0" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><ellipse cx="25" cy="18.7" rx="5.2" ry="1.5" fill="#3f8f3a"/><path d="M25 18.4 Q24.4 14.8 25 11.4" stroke="#8a5a2b" stroke-width=".95" fill="none" stroke-linecap="round"/><g stroke="#1f7a2e" stroke-width=".8" fill="none" stroke-linecap="round"><path d="M25 11.6 Q21.6 9 18.8 11.6"/><path d="M25 11.6 Q22 8.4 20 9"/><path d="M25 11.6 Q23.4 8.6 22.4 8"/><path d="M25 11.6 Q28.4 9 31.2 11.6"/><path d="M25 11.6 Q28 8.4 30 9"/><path d="M25 11.6 Q26.6 8.6 27.6 8"/></g><path d="M23.9 8.3 Q25 5.9 26.2 8.3 Q25 8.9 23.9 8.3Z" fill="#D21034"/><path d="M19.4 22 Q25 23.4 30.6 22 L30.6 22.9 Q25 24.3 19.4 22.9Z" fill="#fff" stroke="#555" stroke-width=".18"/><path d="M21 22.55 L29 22.55" stroke="#333" stroke-width=".28" stroke-dasharray=".7 .35"/></svg> RAPPORT DE CLÔTURE</h3><span class="clo-cur">GOURDES (HTG)</span></div>
           <div class="clo-body" id="cloHTG"></div>
         </div>
         <div class="clo-card usd">
-          <div class="clo-card-head"><h3><svg class="flagsvg" viewBox="0 0 30 20" aria-label="États-Unis" role="img"><rect width="30" height="20" fill="#fff"/><g fill="#B22234"><rect width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.15" width="30" height="1.54"/><rect y="9.23" width="30" height="1.54"/><rect y="12.3" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.46" width="30" height="1.54"/></g><rect width="12.5" height="10.8" fill="#3C3B6E"/><g fill="#fff"><circle cx="3" cy="2.6" r=".6"/><circle cx="6.2" cy="2.6" r=".6"/><circle cx="9.4" cy="2.6" r=".6"/><circle cx="4.6" cy="5.4" r=".6"/><circle cx="7.8" cy="5.4" r=".6"/><circle cx="3" cy="8.2" r=".6"/><circle cx="6.2" cy="8.2" r=".6"/><circle cx="9.4" cy="8.2" r=".6"/></g></svg> RAPPORT DE CLÔTURE</h3><span class="clo-cur">DOLLARS (USD)</span></div>
+          <div class="clo-card-head"><h3><svg class="flagsvg us" viewBox="0 0 57 30" aria-label="États-Unis" role="img"><rect width="57" height="30" fill="#fff"/><rect y="0.000" width="57" height="2.318" fill="#B22234"/><rect y="4.615" width="57" height="2.318" fill="#B22234"/><rect y="9.231" width="57" height="2.318" fill="#B22234"/><rect y="13.846" width="57" height="2.318" fill="#B22234"/><rect y="18.462" width="57" height="2.318" fill="#B22234"/><rect y="23.077" width="57" height="2.318" fill="#B22234"/><rect y="27.692" width="57" height="2.318" fill="#B22234"/><rect width="22.80" height="16.154" fill="#3C3B6E"/><path fill="#fff" d="M1.90,0.47 L2.16,1.26 L2.99,1.26 L2.32,1.75 L2.58,2.55 L1.90,2.05 L1.22,2.55 L1.48,1.75 L0.81,1.26 L1.64,1.26Z M5.70,0.47 L5.96,1.26 L6.79,1.26 L6.12,1.75 L6.38,2.55 L5.70,2.05 L5.02,2.55 L5.28,1.75 L4.61,1.26 L5.44,1.26Z M9.50,0.47 L9.76,1.26 L10.59,1.26 L9.92,1.75 L10.18,2.55 L9.50,2.05 L8.82,2.55 L9.08,1.75 L8.41,1.26 L9.24,1.26Z M13.30,0.47 L13.56,1.26 L14.39,1.26 L13.72,1.75 L13.98,2.55 L13.30,2.05 L12.62,2.55 L12.88,1.75 L12.21,1.26 L13.04,1.26Z M17.10,0.47 L17.36,1.26 L18.19,1.26 L17.52,1.75 L17.78,2.55 L17.10,2.05 L16.42,2.55 L16.68,1.75 L16.01,1.26 L16.84,1.26Z M20.90,0.47 L21.16,1.26 L21.99,1.26 L21.32,1.75 L21.58,2.55 L20.90,2.05 L20.22,2.55 L20.48,1.75 L19.81,1.26 L20.64,1.26Z M3.80,2.08 L4.06,2.88 L4.89,2.88 L4.22,3.37 L4.48,4.16 L3.80,3.67 L3.12,4.16 L3.38,3.37 L2.71,2.88 L3.54,2.88Z M7.60,2.08 L7.86,2.88 L8.69,2.88 L8.02,3.37 L8.28,4.16 L7.60,3.67 L6.92,4.16 L7.18,3.37 L6.51,2.88 L7.34,2.88Z M11.40,2.08 L11.66,2.88 L12.49,2.88 L11.82,3.37 L12.08,4.16 L11.40,3.67 L10.72,4.16 L10.98,3.37 L10.31,2.88 L11.14,2.88Z M15.20,2.08 L15.46,2.88 L16.29,2.88 L15.62,3.37 L15.88,4.16 L15.20,3.67 L14.52,4.16 L14.78,3.37 L14.11,2.88 L14.94,2.88Z M19.00,2.08 L19.26,2.88 L20.09,2.88 L19.42,3.37 L19.68,4.16 L19.00,3.67 L18.32,4.16 L18.58,3.37 L17.91,2.88 L18.74,2.88Z M1.90,3.70 L2.16,4.49 L2.99,4.49 L2.32,4.98 L2.58,5.78 L1.90,5.29 L1.22,5.78 L1.48,4.98 L0.81,4.49 L1.64,4.49Z M5.70,3.70 L5.96,4.49 L6.79,4.49 L6.12,4.98 L6.38,5.78 L5.70,5.29 L5.02,5.78 L5.28,4.98 L4.61,4.49 L5.44,4.49Z M9.50,3.70 L9.76,4.49 L10.59,4.49 L9.92,4.98 L10.18,5.78 L9.50,5.29 L8.82,5.78 L9.08,4.98 L8.41,4.49 L9.24,4.49Z M13.30,3.70 L13.56,4.49 L14.39,4.49 L13.72,4.98 L13.98,5.78 L13.30,5.29 L12.62,5.78 L12.88,4.98 L12.21,4.49 L13.04,4.49Z M17.10,3.70 L17.36,4.49 L18.19,4.49 L17.52,4.98 L17.78,5.78 L17.10,5.29 L16.42,5.78 L16.68,4.98 L16.01,4.49 L16.84,4.49Z M20.90,3.70 L21.16,4.49 L21.99,4.49 L21.32,4.98 L21.58,5.78 L20.90,5.29 L20.22,5.78 L20.48,4.98 L19.81,4.49 L20.64,4.49Z M3.80,5.31 L4.06,6.11 L4.89,6.11 L4.22,6.60 L4.48,7.39 L3.80,6.90 L3.12,7.39 L3.38,6.60 L2.71,6.11 L3.54,6.11Z M7.60,5.31 L7.86,6.11 L8.69,6.11 L8.02,6.60 L8.28,7.39 L7.60,6.90 L6.92,7.39 L7.18,6.60 L6.51,6.11 L7.34,6.11Z M11.40,5.31 L11.66,6.11 L12.49,6.11 L11.82,6.60 L12.08,7.39 L11.40,6.90 L10.72,7.39 L10.98,6.60 L10.31,6.11 L11.14,6.11Z M15.20,5.31 L15.46,6.11 L16.29,6.11 L15.62,6.60 L15.88,7.39 L15.20,6.90 L14.52,7.39 L14.78,6.60 L14.11,6.11 L14.94,6.11Z M19.00,5.31 L19.26,6.11 L20.09,6.11 L19.42,6.60 L19.68,7.39 L19.00,6.90 L18.32,7.39 L18.58,6.60 L17.91,6.11 L18.74,6.11Z M1.90,6.93 L2.16,7.72 L2.99,7.72 L2.32,8.21 L2.58,9.01 L1.90,8.52 L1.22,9.01 L1.48,8.21 L0.81,7.72 L1.64,7.72Z M5.70,6.93 L5.96,7.72 L6.79,7.72 L6.12,8.21 L6.38,9.01 L5.70,8.52 L5.02,9.01 L5.28,8.21 L4.61,7.72 L5.44,7.72Z M9.50,6.93 L9.76,7.72 L10.59,7.72 L9.92,8.21 L10.18,9.01 L9.50,8.52 L8.82,9.01 L9.08,8.21 L8.41,7.72 L9.24,7.72Z M13.30,6.93 L13.56,7.72 L14.39,7.72 L13.72,8.21 L13.98,9.01 L13.30,8.52 L12.62,9.01 L12.88,8.21 L12.21,7.72 L13.04,7.72Z M17.10,6.93 L17.36,7.72 L18.19,7.72 L17.52,8.21 L17.78,9.01 L17.10,8.52 L16.42,9.01 L16.68,8.21 L16.01,7.72 L16.84,7.72Z M20.90,6.93 L21.16,7.72 L21.99,7.72 L21.32,8.21 L21.58,9.01 L20.90,8.52 L20.22,9.01 L20.48,8.21 L19.81,7.72 L20.64,7.72Z M3.80,8.54 L4.06,9.34 L4.89,9.34 L4.22,9.83 L4.48,10.62 L3.80,10.13 L3.12,10.62 L3.38,9.83 L2.71,9.34 L3.54,9.34Z M7.60,8.54 L7.86,9.34 L8.69,9.34 L8.02,9.83 L8.28,10.62 L7.60,10.13 L6.92,10.62 L7.18,9.83 L6.51,9.34 L7.34,9.34Z M11.40,8.54 L11.66,9.34 L12.49,9.34 L11.82,9.83 L12.08,10.62 L11.40,10.13 L10.72,10.62 L10.98,9.83 L10.31,9.34 L11.14,9.34Z M15.20,8.54 L15.46,9.34 L16.29,9.34 L15.62,9.83 L15.88,10.62 L15.20,10.13 L14.52,10.62 L14.78,9.83 L14.11,9.34 L14.94,9.34Z M19.00,8.54 L19.26,9.34 L20.09,9.34 L19.42,9.83 L19.68,10.62 L19.00,10.13 L18.32,10.62 L18.58,9.83 L17.91,9.34 L18.74,9.34Z M1.90,10.16 L2.16,10.95 L2.99,10.95 L2.32,11.44 L2.58,12.24 L1.90,11.75 L1.22,12.24 L1.48,11.44 L0.81,10.95 L1.64,10.95Z M5.70,10.16 L5.96,10.95 L6.79,10.95 L6.12,11.44 L6.38,12.24 L5.70,11.75 L5.02,12.24 L5.28,11.44 L4.61,10.95 L5.44,10.95Z M9.50,10.16 L9.76,10.95 L10.59,10.95 L9.92,11.44 L10.18,12.24 L9.50,11.75 L8.82,12.24 L9.08,11.44 L8.41,10.95 L9.24,10.95Z M13.30,10.16 L13.56,10.95 L14.39,10.95 L13.72,11.44 L13.98,12.24 L13.30,11.75 L12.62,12.24 L12.88,11.44 L12.21,10.95 L13.04,10.95Z M17.10,10.16 L17.36,10.95 L18.19,10.95 L17.52,11.44 L17.78,12.24 L17.10,11.75 L16.42,12.24 L16.68,11.44 L16.01,10.95 L16.84,10.95Z M20.90,10.16 L21.16,10.95 L21.99,10.95 L21.32,11.44 L21.58,12.24 L20.90,11.75 L20.22,12.24 L20.48,11.44 L19.81,10.95 L20.64,10.95Z M3.80,11.77 L4.06,12.57 L4.89,12.57 L4.22,13.06 L4.48,13.85 L3.80,13.36 L3.12,13.85 L3.38,13.06 L2.71,12.57 L3.54,12.57Z M7.60,11.77 L7.86,12.57 L8.69,12.57 L8.02,13.06 L8.28,13.85 L7.60,13.36 L6.92,13.85 L7.18,13.06 L6.51,12.57 L7.34,12.57Z M11.40,11.77 L11.66,12.57 L12.49,12.57 L11.82,13.06 L12.08,13.85 L11.40,13.36 L10.72,13.85 L10.98,13.06 L10.31,12.57 L11.14,12.57Z M15.20,11.77 L15.46,12.57 L16.29,12.57 L15.62,13.06 L15.88,13.85 L15.20,13.36 L14.52,13.85 L14.78,13.06 L14.11,12.57 L14.94,12.57Z M19.00,11.77 L19.26,12.57 L20.09,12.57 L19.42,13.06 L19.68,13.85 L19.00,13.36 L18.32,13.85 L18.58,13.06 L17.91,12.57 L18.74,12.57Z M1.90,13.39 L2.16,14.18 L2.99,14.18 L2.32,14.67 L2.58,15.47 L1.90,14.98 L1.22,15.47 L1.48,14.67 L0.81,14.18 L1.64,14.18Z M5.70,13.39 L5.96,14.18 L6.79,14.18 L6.12,14.67 L6.38,15.47 L5.70,14.98 L5.02,15.47 L5.28,14.67 L4.61,14.18 L5.44,14.18Z M9.50,13.39 L9.76,14.18 L10.59,14.18 L9.92,14.67 L10.18,15.47 L9.50,14.98 L8.82,15.47 L9.08,14.67 L8.41,14.18 L9.24,14.18Z M13.30,13.39 L13.56,14.18 L14.39,14.18 L13.72,14.67 L13.98,15.47 L13.30,14.98 L12.62,15.47 L12.88,14.67 L12.21,14.18 L13.04,14.18Z M17.10,13.39 L17.36,14.18 L18.19,14.18 L17.52,14.67 L17.78,15.47 L17.10,14.98 L16.42,15.47 L16.68,14.67 L16.01,14.18 L16.84,14.18Z M20.90,13.39 L21.16,14.18 L21.99,14.18 L21.32,14.67 L21.58,15.47 L20.90,14.98 L20.22,15.47 L20.48,14.67 L19.81,14.18 L20.64,14.18Z"/></svg> RAPPORT DE CLÔTURE</h3><span class="clo-cur">DOLLARS (USD)</span></div>
           <div class="clo-body" id="cloUSD"></div>
         </div>
       </div>
@@ -1485,7 +1499,7 @@
         <div class="caisse-box">
           <div class="caisse-box-header">
             <div class="caisse-title-flag">
-              <span class="flag-icon"><svg class="flagsvg" viewBox="0 0 30 20" aria-label="Haïti" role="img"><rect width="30" height="10" fill="#00209F"/><rect y="10" width="30" height="10" fill="#D21034"/><rect x="9" y="5.5" width="12" height="9" fill="#fff"/><path d="M15 7.2l3 5.6h-6z" fill="#1f8a3b"/></svg></span>
+              <span class="flag-icon"><svg class="flagsvg ht" viewBox="0 0 50 30" aria-label="Haïti" role="img"><rect width="50" height="15" fill="#00209F"/><rect y="15" width="50" height="15" fill="#D21034"/><rect x="17" y="6.5" width="16" height="17" fill="#fff"/><g fill="#444"><rect x="18.6" y="19.3" width="5" height="1.1" rx=".5" transform="rotate(-14 21 19.8)"/><rect x="26.4" y="19.3" width="5" height="1.1" rx=".5" transform="rotate(14 29 19.8)"/></g><g fill="#222"><circle cx="23.4" cy="21" r=".55"/><circle cx="26.6" cy="21" r=".55"/><circle cx="25" cy="20.3" r=".55"/></g><g transform="translate(25 18.6) rotate(-66)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="-2.3" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="-2.3" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(-48)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="-2.3" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="-2.3" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(-30)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="-2.3" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="-2.3" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(30)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="0" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="0" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(48)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="0" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="0" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><g transform="translate(25 18.6) rotate(66)"><line x1="0" y1="0" x2="0" y2="-6.2" stroke="#6b4a1e" stroke-width=".35"/><rect x="0" y="-6.2" width="2.3" height=".85" fill="#00209F"/><rect x="0" y="-5.35" width="2.3" height=".85" fill="#D21034"/></g><ellipse cx="25" cy="18.7" rx="5.2" ry="1.5" fill="#3f8f3a"/><path d="M25 18.4 Q24.4 14.8 25 11.4" stroke="#8a5a2b" stroke-width=".95" fill="none" stroke-linecap="round"/><g stroke="#1f7a2e" stroke-width=".8" fill="none" stroke-linecap="round"><path d="M25 11.6 Q21.6 9 18.8 11.6"/><path d="M25 11.6 Q22 8.4 20 9"/><path d="M25 11.6 Q23.4 8.6 22.4 8"/><path d="M25 11.6 Q28.4 9 31.2 11.6"/><path d="M25 11.6 Q28 8.4 30 9"/><path d="M25 11.6 Q26.6 8.6 27.6 8"/></g><path d="M23.9 8.3 Q25 5.9 26.2 8.3 Q25 8.9 23.9 8.3Z" fill="#D21034"/><path d="M19.4 22 Q25 23.4 30.6 22 L30.6 22.9 Q25 24.3 19.4 22.9Z" fill="#fff" stroke="#555" stroke-width=".18"/><path d="M21 22.55 L29 22.55" stroke="#333" stroke-width=".28" stroke-dasharray=".7 .35"/></svg></span>
               <div>
                 <h3>Caisse Gourdes (HTG)</h3>
                 <p style="font-size: 11px; color: var(--text-muted);">Solde Théorique de Caisse</p>
@@ -1520,7 +1534,7 @@
         <div class="caisse-box">
           <div class="caisse-box-header">
             <div class="caisse-title-flag">
-              <span class="flag-icon"><svg class="flagsvg" viewBox="0 0 30 20" aria-label="États-Unis" role="img"><rect width="30" height="20" fill="#fff"/><g fill="#B22234"><rect width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.15" width="30" height="1.54"/><rect y="9.23" width="30" height="1.54"/><rect y="12.3" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.46" width="30" height="1.54"/></g><rect width="12.5" height="10.8" fill="#3C3B6E"/><g fill="#fff"><circle cx="3" cy="2.6" r=".6"/><circle cx="6.2" cy="2.6" r=".6"/><circle cx="9.4" cy="2.6" r=".6"/><circle cx="4.6" cy="5.4" r=".6"/><circle cx="7.8" cy="5.4" r=".6"/><circle cx="3" cy="8.2" r=".6"/><circle cx="6.2" cy="8.2" r=".6"/><circle cx="9.4" cy="8.2" r=".6"/></g></svg></span>
+              <span class="flag-icon"><svg class="flagsvg us" viewBox="0 0 57 30" aria-label="États-Unis" role="img"><rect width="57" height="30" fill="#fff"/><rect y="0.000" width="57" height="2.318" fill="#B22234"/><rect y="4.615" width="57" height="2.318" fill="#B22234"/><rect y="9.231" width="57" height="2.318" fill="#B22234"/><rect y="13.846" width="57" height="2.318" fill="#B22234"/><rect y="18.462" width="57" height="2.318" fill="#B22234"/><rect y="23.077" width="57" height="2.318" fill="#B22234"/><rect y="27.692" width="57" height="2.318" fill="#B22234"/><rect width="22.80" height="16.154" fill="#3C3B6E"/><path fill="#fff" d="M1.90,0.47 L2.16,1.26 L2.99,1.26 L2.32,1.75 L2.58,2.55 L1.90,2.05 L1.22,2.55 L1.48,1.75 L0.81,1.26 L1.64,1.26Z M5.70,0.47 L5.96,1.26 L6.79,1.26 L6.12,1.75 L6.38,2.55 L5.70,2.05 L5.02,2.55 L5.28,1.75 L4.61,1.26 L5.44,1.26Z M9.50,0.47 L9.76,1.26 L10.59,1.26 L9.92,1.75 L10.18,2.55 L9.50,2.05 L8.82,2.55 L9.08,1.75 L8.41,1.26 L9.24,1.26Z M13.30,0.47 L13.56,1.26 L14.39,1.26 L13.72,1.75 L13.98,2.55 L13.30,2.05 L12.62,2.55 L12.88,1.75 L12.21,1.26 L13.04,1.26Z M17.10,0.47 L17.36,1.26 L18.19,1.26 L17.52,1.75 L17.78,2.55 L17.10,2.05 L16.42,2.55 L16.68,1.75 L16.01,1.26 L16.84,1.26Z M20.90,0.47 L21.16,1.26 L21.99,1.26 L21.32,1.75 L21.58,2.55 L20.90,2.05 L20.22,2.55 L20.48,1.75 L19.81,1.26 L20.64,1.26Z M3.80,2.08 L4.06,2.88 L4.89,2.88 L4.22,3.37 L4.48,4.16 L3.80,3.67 L3.12,4.16 L3.38,3.37 L2.71,2.88 L3.54,2.88Z M7.60,2.08 L7.86,2.88 L8.69,2.88 L8.02,3.37 L8.28,4.16 L7.60,3.67 L6.92,4.16 L7.18,3.37 L6.51,2.88 L7.34,2.88Z M11.40,2.08 L11.66,2.88 L12.49,2.88 L11.82,3.37 L12.08,4.16 L11.40,3.67 L10.72,4.16 L10.98,3.37 L10.31,2.88 L11.14,2.88Z M15.20,2.08 L15.46,2.88 L16.29,2.88 L15.62,3.37 L15.88,4.16 L15.20,3.67 L14.52,4.16 L14.78,3.37 L14.11,2.88 L14.94,2.88Z M19.00,2.08 L19.26,2.88 L20.09,2.88 L19.42,3.37 L19.68,4.16 L19.00,3.67 L18.32,4.16 L18.58,3.37 L17.91,2.88 L18.74,2.88Z M1.90,3.70 L2.16,4.49 L2.99,4.49 L2.32,4.98 L2.58,5.78 L1.90,5.29 L1.22,5.78 L1.48,4.98 L0.81,4.49 L1.64,4.49Z M5.70,3.70 L5.96,4.49 L6.79,4.49 L6.12,4.98 L6.38,5.78 L5.70,5.29 L5.02,5.78 L5.28,4.98 L4.61,4.49 L5.44,4.49Z M9.50,3.70 L9.76,4.49 L10.59,4.49 L9.92,4.98 L10.18,5.78 L9.50,5.29 L8.82,5.78 L9.08,4.98 L8.41,4.49 L9.24,4.49Z M13.30,3.70 L13.56,4.49 L14.39,4.49 L13.72,4.98 L13.98,5.78 L13.30,5.29 L12.62,5.78 L12.88,4.98 L12.21,4.49 L13.04,4.49Z M17.10,3.70 L17.36,4.49 L18.19,4.49 L17.52,4.98 L17.78,5.78 L17.10,5.29 L16.42,5.78 L16.68,4.98 L16.01,4.49 L16.84,4.49Z M20.90,3.70 L21.16,4.49 L21.99,4.49 L21.32,4.98 L21.58,5.78 L20.90,5.29 L20.22,5.78 L20.48,4.98 L19.81,4.49 L20.64,4.49Z M3.80,5.31 L4.06,6.11 L4.89,6.11 L4.22,6.60 L4.48,7.39 L3.80,6.90 L3.12,7.39 L3.38,6.60 L2.71,6.11 L3.54,6.11Z M7.60,5.31 L7.86,6.11 L8.69,6.11 L8.02,6.60 L8.28,7.39 L7.60,6.90 L6.92,7.39 L7.18,6.60 L6.51,6.11 L7.34,6.11Z M11.40,5.31 L11.66,6.11 L12.49,6.11 L11.82,6.60 L12.08,7.39 L11.40,6.90 L10.72,7.39 L10.98,6.60 L10.31,6.11 L11.14,6.11Z M15.20,5.31 L15.46,6.11 L16.29,6.11 L15.62,6.60 L15.88,7.39 L15.20,6.90 L14.52,7.39 L14.78,6.60 L14.11,6.11 L14.94,6.11Z M19.00,5.31 L19.26,6.11 L20.09,6.11 L19.42,6.60 L19.68,7.39 L19.00,6.90 L18.32,7.39 L18.58,6.60 L17.91,6.11 L18.74,6.11Z M1.90,6.93 L2.16,7.72 L2.99,7.72 L2.32,8.21 L2.58,9.01 L1.90,8.52 L1.22,9.01 L1.48,8.21 L0.81,7.72 L1.64,7.72Z M5.70,6.93 L5.96,7.72 L6.79,7.72 L6.12,8.21 L6.38,9.01 L5.70,8.52 L5.02,9.01 L5.28,8.21 L4.61,7.72 L5.44,7.72Z M9.50,6.93 L9.76,7.72 L10.59,7.72 L9.92,8.21 L10.18,9.01 L9.50,8.52 L8.82,9.01 L9.08,8.21 L8.41,7.72 L9.24,7.72Z M13.30,6.93 L13.56,7.72 L14.39,7.72 L13.72,8.21 L13.98,9.01 L13.30,8.52 L12.62,9.01 L12.88,8.21 L12.21,7.72 L13.04,7.72Z M17.10,6.93 L17.36,7.72 L18.19,7.72 L17.52,8.21 L17.78,9.01 L17.10,8.52 L16.42,9.01 L16.68,8.21 L16.01,7.72 L16.84,7.72Z M20.90,6.93 L21.16,7.72 L21.99,7.72 L21.32,8.21 L21.58,9.01 L20.90,8.52 L20.22,9.01 L20.48,8.21 L19.81,7.72 L20.64,7.72Z M3.80,8.54 L4.06,9.34 L4.89,9.34 L4.22,9.83 L4.48,10.62 L3.80,10.13 L3.12,10.62 L3.38,9.83 L2.71,9.34 L3.54,9.34Z M7.60,8.54 L7.86,9.34 L8.69,9.34 L8.02,9.83 L8.28,10.62 L7.60,10.13 L6.92,10.62 L7.18,9.83 L6.51,9.34 L7.34,9.34Z M11.40,8.54 L11.66,9.34 L12.49,9.34 L11.82,9.83 L12.08,10.62 L11.40,10.13 L10.72,10.62 L10.98,9.83 L10.31,9.34 L11.14,9.34Z M15.20,8.54 L15.46,9.34 L16.29,9.34 L15.62,9.83 L15.88,10.62 L15.20,10.13 L14.52,10.62 L14.78,9.83 L14.11,9.34 L14.94,9.34Z M19.00,8.54 L19.26,9.34 L20.09,9.34 L19.42,9.83 L19.68,10.62 L19.00,10.13 L18.32,10.62 L18.58,9.83 L17.91,9.34 L18.74,9.34Z M1.90,10.16 L2.16,10.95 L2.99,10.95 L2.32,11.44 L2.58,12.24 L1.90,11.75 L1.22,12.24 L1.48,11.44 L0.81,10.95 L1.64,10.95Z M5.70,10.16 L5.96,10.95 L6.79,10.95 L6.12,11.44 L6.38,12.24 L5.70,11.75 L5.02,12.24 L5.28,11.44 L4.61,10.95 L5.44,10.95Z M9.50,10.16 L9.76,10.95 L10.59,10.95 L9.92,11.44 L10.18,12.24 L9.50,11.75 L8.82,12.24 L9.08,11.44 L8.41,10.95 L9.24,10.95Z M13.30,10.16 L13.56,10.95 L14.39,10.95 L13.72,11.44 L13.98,12.24 L13.30,11.75 L12.62,12.24 L12.88,11.44 L12.21,10.95 L13.04,10.95Z M17.10,10.16 L17.36,10.95 L18.19,10.95 L17.52,11.44 L17.78,12.24 L17.10,11.75 L16.42,12.24 L16.68,11.44 L16.01,10.95 L16.84,10.95Z M20.90,10.16 L21.16,10.95 L21.99,10.95 L21.32,11.44 L21.58,12.24 L20.90,11.75 L20.22,12.24 L20.48,11.44 L19.81,10.95 L20.64,10.95Z M3.80,11.77 L4.06,12.57 L4.89,12.57 L4.22,13.06 L4.48,13.85 L3.80,13.36 L3.12,13.85 L3.38,13.06 L2.71,12.57 L3.54,12.57Z M7.60,11.77 L7.86,12.57 L8.69,12.57 L8.02,13.06 L8.28,13.85 L7.60,13.36 L6.92,13.85 L7.18,13.06 L6.51,12.57 L7.34,12.57Z M11.40,11.77 L11.66,12.57 L12.49,12.57 L11.82,13.06 L12.08,13.85 L11.40,13.36 L10.72,13.85 L10.98,13.06 L10.31,12.57 L11.14,12.57Z M15.20,11.77 L15.46,12.57 L16.29,12.57 L15.62,13.06 L15.88,13.85 L15.20,13.36 L14.52,13.85 L14.78,13.06 L14.11,12.57 L14.94,12.57Z M19.00,11.77 L19.26,12.57 L20.09,12.57 L19.42,13.06 L19.68,13.85 L19.00,13.36 L18.32,13.85 L18.58,13.06 L17.91,12.57 L18.74,12.57Z M1.90,13.39 L2.16,14.18 L2.99,14.18 L2.32,14.67 L2.58,15.47 L1.90,14.98 L1.22,15.47 L1.48,14.67 L0.81,14.18 L1.64,14.18Z M5.70,13.39 L5.96,14.18 L6.79,14.18 L6.12,14.67 L6.38,15.47 L5.70,14.98 L5.02,15.47 L5.28,14.67 L4.61,14.18 L5.44,14.18Z M9.50,13.39 L9.76,14.18 L10.59,14.18 L9.92,14.67 L10.18,15.47 L9.50,14.98 L8.82,15.47 L9.08,14.67 L8.41,14.18 L9.24,14.18Z M13.30,13.39 L13.56,14.18 L14.39,14.18 L13.72,14.67 L13.98,15.47 L13.30,14.98 L12.62,15.47 L12.88,14.67 L12.21,14.18 L13.04,14.18Z M17.10,13.39 L17.36,14.18 L18.19,14.18 L17.52,14.67 L17.78,15.47 L17.10,14.98 L16.42,15.47 L16.68,14.67 L16.01,14.18 L16.84,14.18Z M20.90,13.39 L21.16,14.18 L21.99,14.18 L21.32,14.67 L21.58,15.47 L20.90,14.98 L20.22,15.47 L20.48,14.67 L19.81,14.18 L20.64,14.18Z"/></svg></span>
               <div>
                 <h3>Caisse Dollars (USD)</h3>
                 <p style="font-size: 11px; color: var(--text-muted);">Solde Théorique de Caisse</p>
@@ -1839,12 +1853,14 @@
     // Les opérations du jour et le solde d'ouverture viennent de Firebase (partagés entre tous les appareils).
     let transactionsData = [];   // opérations du jour courant
     let openings = {};           // solde d'ouverture enregistré : { 'AAAA-MM-JJ': { HTG, USD, manuel } }
-    let carry = { HTG: 0, USD: 0 }; // fermeture du dernier jour précédent (en centimes)
+    let carry = { HTG: 0, USD: 0, NAT: 0 }; // fermeture du dernier jour précédent (en centimes)
 
     // Listes modifiables par l'administrateur (Paramètres). Valeurs de départ si rien n'est encore enregistré.
+    // Motif réservé : une sortie de caisse avec ce motif augmente le compte Natcash de l'agence.
+    const NAT_MOTIF = 'Recharge compte Natcash';
     const DEFAULT_LISTES = {
       motifsEntree: ["Renflouement", "Remboursement", "Retrait à la banque", "Retour de fonds", "Recettes diverses"],
-      motifsSortie: ["Dépenses", "Payroll (Salaires)", "Frais de fonctionnement", "Dettes", "Avance sur salaire", "Achat fournitures"],
+      motifsSortie: ["Dépenses", "Payroll (Salaires)", "Frais de fonctionnement", "Dettes", "Avance sur salaire", "Achat fournitures", NAT_MOTIF],
       ordonnateurs: ["Ocgénor", "Osmin"]
     };
     let listes = JSON.parse(JSON.stringify(DEFAULT_LISTES));
@@ -2258,7 +2274,7 @@
     // Ferme tout : surveillances, données affichées, retour à la page de connexion
     function clearSession() {
       if (window.FB) FB.stopWatching();
-      transactionsData = []; openings = {}; carry = { HTG: 0, USD: 0 };
+      transactionsData = []; openings = {}; carry = { HTG: 0, USD: 0, NAT: 0 };
       histAll = []; histReady = false;
       rapView = null; cloView = null; lastBackup = null; sharedTaux = null;
       listes = JSON.parse(JSON.stringify(DEFAULT_LISTES));
@@ -2302,7 +2318,7 @@
       }, fail);
       FB.watchSolde(day, sd => {
         if (day !== currentDay) return;
-        if (sd) openings[day] = { HTG: sd.HTG, USD: sd.USD, manuel: !!sd.manuel }; else delete openings[day];
+        if (sd) openings[day] = { HTG: sd.HTG, USD: sd.USD, NAT: sd.NAT, manuel: !!sd.manuel }; else delete openings[day];
         refreshAll();
       }, fail);
       try {
@@ -2311,8 +2327,8 @@
         if (prev) {
           const ops = await FB.getOpsOfDay(prev.day);
           const f = flowsOfList(ops);
-          carry = { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD };
-        } else carry = { HTG: 0, USD: 0 };
+          carry = { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD, NAT: natCarry(prev, ops) };
+        } else carry = { HTG: 0, USD: 0, NAT: 0 };
         refreshAll();
       } catch (err) { fail(err); }
     }
@@ -2479,6 +2495,7 @@
         ordonnateurs: cleanList(d.ordonnateurs, DEFAULT_LISTES.ordonnateurs)
       };
       ['motifsEntree', 'motifsSortie', 'ordonnateurs'].forEach(k => { if (!listes[k].length) listes[k] = DEFAULT_LISTES[k].slice(); });
+      if (!listes.motifsSortie.includes(NAT_MOTIF)) listes.motifsSortie.push(NAT_MOTIF);
       fillOrdonnateurs();
       updateInternalMotifs(document.getElementById('intType').value === 'sortie' ? 'sortie' : 'entree');
       renderListesAdmin();
@@ -2491,7 +2508,7 @@
       box.innerHTML = Object.keys(LISTE_TITRES).map(k => `
         <div style="margin-bottom:14px;">
           <strong style="font-size:13px;">${esc(LISTE_TITRES[k])}</strong>
-          <div class="chips">${listes[k].map((v, i) => `<span class="chip">${esc(v)} <button type="button" aria-label="Retirer" onclick="listeRemove('${k}', ${i})">✕</button></span>`).join('')}</div>
+          <div class="chips">${listes[k].map((v, i) => `<span class="chip">${esc(v)} ${v === NAT_MOTIF ? '<span title="Motif réservé (calcul du compte Natcash)">🔒</span>' : `<button type="button" aria-label="Retirer" onclick="listeRemove('${k}', ${i})">✕</button>`}</span>`).join('')}</div>
           <div class="chip-add"><input type="text" maxlength="60" id="add_${k}" placeholder="Ajouter…" onkeydown="if(event.key==='Enter'){event.preventDefault();listeAdd('${k}');}"><button type="button" class="btn-mini warn" onclick="listeAdd('${k}')">Ajouter</button></div>
         </div>`).join('');
     }
@@ -2509,6 +2526,7 @@
     }
     function listeRemove(k, i) {
       if (currentRole !== 'admin') return;
+      if (listes[k][i] === NAT_MOTIF) { alert('Ce motif est réservé au calcul du compte Natcash : il ne peut pas être retiré.'); return; }
       if (listes[k].length <= 1) { alert('Une liste doit garder au moins un élément.'); return; }
       if (!confirm('Retirer « ' + listes[k][i] + ' » de la liste ? Les anciennes opérations ne changent pas.')) return;
       const next = JSON.parse(JSON.stringify(listes)); next[k].splice(i, 1);
@@ -2555,6 +2573,25 @@
       return [];
     }
 
+    // Compte Natcash de l'agence (en centimes), opérations validées seulement :
+    //  retrait client = le compte augmente ; dépôt client = le compte diminue ;
+    //  recharge (sortie de caisse avec le motif réservé) = le compte augmente.
+    function natParts(list) {
+      const p = { retraits: 0, depots: 0, recharges: 0 };
+      list.filter(t => t.status === 'Validé').forEach(t => {
+        if (t.service === 'Natcash') {
+          if (t.type === 'Retrait') p.retraits += toCents(t.montantHTG);
+          else if (t.type === 'Dépôt') p.depots += toCents(t.montantHTG);
+        } else if (t.service === 'Trans. Interne' && t.type === 'sortie' && t.devise === 'HTG' && t.motif === NAT_MOTIF) {
+          p.recharges += toCents(t.montant);
+        }
+      });
+      return p;
+    }
+    // Fermeture Natcash d'un jour précédent ; si ce jour n'a jamais eu de solde Natcash (ancien enregistrement), on repart de 0.
+    const natCarry = (prev, ops) => prev.NAT == null ? 0 : toCents(prev.NAT) + natNet(ops);
+    const natNet = list => { const p = natParts(list); return p.retraits + p.recharges - p.depots; };
+
     // Mouvement net (en centimes) des opérations validées d'un jour donné
     function flowsOfList(list) {
       const c = { HTG: 0, USD: 0 };
@@ -2569,18 +2606,30 @@
 
     // Solde d'ouverture d'un jour (en centimes) : saisi à la main, sinon fermeture du dernier jour précédent connu
     function openingOf(day) {
-      if (openings[day]) return { HTG: toCents(openings[day].HTG), USD: toCents(openings[day].USD) };
-      return { HTG: carry.HTG, USD: carry.USD };
+      const nat = openings[day] && openings[day].NAT != null ? toCents(openings[day].NAT) : carry.NAT;
+      if (openings[day]) return { HTG: toCents(openings[day].HTG), USD: toCents(openings[day].USD), NAT: nat };
+      return { HTG: carry.HTG, USD: carry.USD, NAT: carry.NAT };
     }
 
     async function saveOpening(devise, raw) {
       if (currentRole !== 'admin') { updateCaisseDisplay(); return; }
       const v = parseFloat(raw);
       const cur = openingOf(currentDay);
-      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, manuel: true };
+      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: cur.NAT / 100, manuel: true };
       next[devise] = isFinite(v) ? round2(v) : 0;
       try { await FB.setSolde(currentDay, next); }
       catch (err) { alert("Impossible d'enregistrer le solde d'ouverture : " + friendlyError(err)); updateCaisseDisplay(); }
+    }
+
+    // Solde d'ouverture du compte Natcash (saisi par l'administrateur, puis reporté chaque jour)
+    async function saveOpeningNat(raw) {
+      if (currentRole !== 'admin' || rapView) { updateRapport(); return; }
+      const v = parseFloat(raw);
+      if (!isFinite(v) || v < 0) { alert('Solde invalide : entrez un nombre positif (ou 0).'); updateRapport(); return; }
+      const cur = openingOf(currentDay);
+      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: round2(v), manuel: !!(openings[currentDay] && openings[currentDay].manuel) };
+      try { await FB.setSolde(currentDay, next); }
+      catch (err) { alert("Impossible d'enregistrer le solde d'ouverture Natcash : " + friendlyError(err)); updateRapport(); }
     }
 
     // Caisse d'une liste d'opérations avec un solde d'ouverture donné (en centimes)
@@ -2605,11 +2654,14 @@
     async function openingForDay(day) {
       if (day === currentDay) return openingOf(day);
       const sd = await FB.getSolde(day);
-      if (sd) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD) };
+      if (sd && sd.NAT != null) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD), NAT: toCents(sd.NAT) };
       const prev = await FB.getLatestSoldeBefore(day);
-      if (!prev) return { HTG: 0, USD: 0 };
-      const f = flowsOfList(await FB.getOpsOfDay(prev.day));
-      return { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD };
+      if (!prev) return { HTG: sd ? toCents(sd.HTG) : 0, USD: sd ? toCents(sd.USD) : 0, NAT: 0 };
+      const ops = await FB.getOpsOfDay(prev.day);
+      const f = flowsOfList(ops);
+      const nat = natCarry(prev, ops);
+      if (sd) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD), NAT: nat };
+      return { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD, NAT: nat };
     }
 
     function updateCaisseDisplay() {
@@ -2768,7 +2820,7 @@
       // Les écritures partent dans l'ordre ; sans internet elles sont gardées sur l'appareil puis envoyées automatiquement.
       if (!openings[day]) {
         const o = openingOf(day);
-        FB.setSolde(day, { HTG: o.HTG / 100, USD: o.USD / 100, manuel: false }).catch(() => { /* déjà créé par un autre appareil */ });
+        FB.setSolde(day, { HTG: o.HTG / 100, USD: o.USD / 100, NAT: o.NAT / 100, manuel: false }).catch(() => { /* déjà créé par un autre appareil */ });
       }
       FB.addOp(data).catch(err => alert("L'opération " + data.ref + " n'a PAS été enregistrée : " + friendlyError(err)));
       return true;
@@ -2927,6 +2979,15 @@
     }
 
     // ===== Rapport de synthèse =====
+    let natTheoCents = 0;
+    function updateNatEcart() {
+      const el = document.getElementById('natEcart');
+      const raw = document.getElementById('natBalancePhone').value;
+      if (raw === '' || !isFinite(parseFloat(raw))) { el.innerText = '—'; el.style.color = ''; return; }
+      const d = toCents(parseFloat(raw)) - natTheoCents;
+      el.innerText = (d > 0 ? '+' : '') + htg(d / 100);
+      el.style.color = d === 0 ? 'var(--success-green)' : 'var(--danger-red)';
+    }
     function updateRapport() {
       const tauxBRH = getTauxBRH();
       const tauxZelle = getTauxZelle();
@@ -2957,6 +3018,20 @@
       document.getElementById('natCredit').innerText = htg(sumBy(nat.filter(t => t.type === 'Dépôt'), t => t.montantHTG));
       document.getElementById('natDebit').innerText = htg(sumBy(nat.filter(t => t.type === 'Retrait'), t => t.montantHTG));
       document.getElementById('natCommissions').innerText = htg(sumBy(nat, t => t.commission || 0));
+      // Compte Natcash de l'agence
+      const natOps = nat.concat(repValid('Trans. Interne'));
+      const np = natParts(natOps);
+      const natOpen = rapView ? (rapView.open ? rapView.open.NAT : 0) : openingOf(currentDay).NAT;
+      natTheoCents = natOpen + np.retraits + np.recharges - np.depots;
+      const oi = document.getElementById('natOpenInput');
+      if (document.activeElement !== oi) oi.value = (natOpen / 100).toFixed(2);
+      oi.disabled = !(currentRole === 'admin' && !rapView);
+      oi.title = oi.disabled ? "Modifiable par l'administrateur, pour la journée en cours seulement." : '';
+      document.getElementById('natRetraits').innerText = htg(np.retraits / 100);
+      document.getElementById('natRecharges').innerText = htg(np.recharges / 100);
+      document.getElementById('natDepots').innerText = htg(np.depots / 100);
+      document.getElementById('natTheo').innerText = htg(natTheoCents / 100);
+      updateNatEcart();
 
       // Zelle USD
       const zu = repValid('Zelle USD');
@@ -3175,6 +3250,7 @@
         devise: devise,
         montant: montant,
         typeInfo: `${type === 'entree' ? 'Entrée' : 'Sortie'} (${motif})`,
+        motif: motif,
         libelle: val('intDescription'),
         montantHTG: devise === 'HTG' ? montant : null,
         montantUSD: devise === 'USD' ? montant : null,
@@ -3273,7 +3349,7 @@
       if (!window.FB || !loggedIn) { setMsg('rapMsg', 'Connexion au serveur indisponible.'); return; }
       setMsg('rapMsg', 'Chargement…', true);
       try {
-        rapView = { from, to, ops: await FB.getOpsRange(from, to) };
+        rapView = { from, to, ops: await FB.getOpsRange(from, to), open: await openingForDay(from) };
         setMsg('rapMsg', rapView.ops.length ? '' : 'Aucune opération sur cette période.', true);
         updateRapport();
       } catch (err) { setMsg('rapMsg', 'Chargement impossible : ' + friendlyError(err)); }
