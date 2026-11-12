@@ -1358,7 +1358,7 @@
           </div>
           <div class="metric-row"><span class="metric-label">Total Crédit (Dépôts / Entrée Caisse)</span><span class="metric-value" style="color: var(--success-green);" id="natCredit">0,00 HTG</span></div>
           <div class="metric-row"><span class="metric-label">Total Débit (Retraits / Sortie Caisse)</span><span class="metric-value" style="color: var(--danger-red);" id="natDebit">0,00 HTG</span></div>
-          <div class="metric-row"><span class="metric-label">Commissions Totales (Indicatif)</span><span class="metric-value" style="color: #d97706;" id="natCommissions">0,00 HTG</span></div>
+          <div class="metric-row"><span class="metric-label">Commissions de la période (indicatif)</span><span class="metric-value" style="color: #d97706;" id="natCommissions">0,00 HTG</span></div>
           <div class="highlight-box" style="margin-top: 12px;">
             <div style="font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;">Compte Natcash de l'agence</div>
             <div class="metric-row"><span class="metric-label">Solde d'ouverture Natcash</span><input type="number" step="0.01" min="0" id="natOpenInput" style="width: 130px; padding: 4px 8px; font-size: 13px; text-align: right;" onchange="saveOpeningNat(this.value)"></div>
@@ -1366,6 +1366,17 @@
             <div class="metric-row"><span class="metric-label">+ Recharges du compte (sorties de caisse)</span><span class="metric-value" style="color: var(--success-green);" id="natRecharges">0,00 HTG</span></div>
             <div class="metric-row"><span class="metric-label">− Dépôts clients (le compte diminue)</span><span class="metric-value" style="color: var(--danger-red);" id="natDepots">0,00 HTG</span></div>
             <div class="metric-row"><span class="metric-label"><strong>Solde Natcash théorique</strong></span><span class="metric-value" style="color: #1e40af; font-size: 15px;" id="natTheo">0,00 HTG</span></div>
+          </div>
+          <div class="highlight-box" style="margin-top: 12px;">
+            <div style="font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;">Commissions Natcash (compte séparé du solde)</div>
+            <div class="metric-row"><span class="metric-label">Commissions d'ouverture</span><input type="number" step="0.01" min="0" id="comOpenInput" style="width: 130px; padding: 4px 8px; font-size: 13px; text-align: right;" onchange="saveOpeningCom(this.value)"></div>
+            <div class="metric-row"><span class="metric-label">+ Commissions de la période</span><span class="metric-value" style="color: var(--success-green);" id="comJour">0,00 HTG</span></div>
+            <div class="metric-row"><span class="metric-label"><strong>Commissions totales</strong></span><span class="metric-value" style="color: #b45309; font-size: 15px;" id="comTotal">0,00 HTG</span></div>
+          </div>
+          <div class="count-input-group" style="margin-top: 12px; padding: 10px;">
+            <label style="font-size: 11px;" for="comReal">Commissions réelles (relevé du téléphone)</label>
+            <input type="number" step="0.01" min="0" id="comReal" placeholder="0.00 HTG" style="padding: 6px 10px; font-size: 13px;" oninput="updateComEcart()">
+            <div class="metric-row" style="margin-top: 8px;"><span class="metric-label">Écart (réel − total)</span><span class="metric-value" id="comEcart">—</span></div>
           </div>
           <div class="count-input-group" style="margin-top: 12px; padding: 10px;">
             <label style="font-size: 11px;" for="natBalancePhone">Solde Natcash réel (relevé du téléphone)</label>
@@ -1385,8 +1396,10 @@
             </div>
           </div>
           <div class="metric-row"><span class="metric-label">Volume de transactions</span><span class="metric-value" id="zuVol">0</span></div>
-          <div class="metric-row"><span class="metric-label">Total Envoyé (Entrée Caisse)</span><span class="metric-value" id="zuTotalEnvoye">$0,00 USD</span></div>
-          <div class="metric-row"><span class="metric-label">Total Payé (Sortie Caisse)</span><span class="metric-value" id="zuTotalPaye">$0,00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total Envoyé, brut (Entrée Caisse)</span><span class="metric-value" id="zuTotalEnvoye">$0,00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total Payé, net (Sortie Caisse)</span><span class="metric-value" id="zuTotalPaye">$0,00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total brut (USD)</span><span class="metric-value" id="zuTotBrut">$0,00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total frais (USD)</span><span class="metric-value" id="zuTotFrais">$0,00 USD</span></div>
         </div>
 
         <!-- Carte Zelle HTG -->
@@ -1401,6 +1414,8 @@
           <div class="metric-row"><span class="metric-label">Volume de transactions</span><span class="metric-value" id="zhVol">0</span></div>
           <div class="metric-row"><span class="metric-label">Total Envoyé (Entrée Caisse)</span><span class="metric-value" id="zhTotalEnvoye">0,00 HTG</span></div>
           <div class="metric-row"><span class="metric-label">Total Payé (Sortie Caisse)</span><span class="metric-value" id="zhTotalPaye">0,00 HTG</span></div>
+          <div class="metric-row"><span class="metric-label">Total brut (USD)</span><span class="metric-value" id="zhTotBrut">$0,00 USD</span></div>
+          <div class="metric-row"><span class="metric-label">Total frais (USD)</span><span class="metric-value" id="zhTotFrais">$0,00 USD</span></div>
         </div>
 
         <!-- Carte Zelle : montants ordonnés -->
@@ -1408,13 +1423,13 @@
           <div class="rapport-card-header">
             <img class="svc-logo-sm" src="data:image/png;base64,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" alt="Zelle">
             <div>
-              <h3>Zelle : montants ordonnés</h3>
-              <p style="font-size: 11px; color: var(--text-muted);">Zelle USD + Zelle HTG, tout en dollars</p>
+              <h3>Zelle : totaux par ordonnateur</h3>
+              <p style="font-size: 11px; color: var(--text-muted);">Montants bruts en dollars, Zelle USD + Zelle HTG : à déposer sur le compte BUH</p>
             </div>
           </div>
           <div class="highlight-box" style="margin-top: 0;">
             <div id="zelOrdRows"></div>
-            <div class="metric-row"><span class="metric-label">Total général</span><span class="metric-value" id="zelOrdTotal">$0,00 USD</span></div>
+            <div class="metric-row"><span class="metric-label">Total général à déposer (brut)</span><span class="metric-value" id="zelOrdTotal">$0,00 USD</span></div>
           </div>
         </div>
 
@@ -1582,6 +1597,52 @@
     </div>
 
     <!-- 6. VUE PARAMETRES -->
+    <!-- RELEVÉ COMPTE ZELLE -->
+    <div id="view-zelle" class="view-section">
+      <div class="print-only clo-print-head">
+        <strong>MOSEK MULTI SERVICES</strong>
+        <span>Trois-Rivières, Port-de-Paix, Haïti</span>
+      </div>
+      <h2 class="section-title" id="zelTitle">Relevé Compte Zelle</h2>
+      <div class="set-card no-print">
+        <div class="hist-actions" id="zelTabs" style="margin-top: 0; margin-bottom: 12px;"></div>
+        <div class="hist-filters">
+          <div><label for="zelFrom">Du</label><input type="date" id="zelFrom"></div>
+          <div><label for="zelTo">Au</label><input type="date" id="zelTo"></div>
+        </div>
+        <div class="hist-actions">
+          <button type="button" class="primary" id="zelBtn" onclick="runZelle()">Afficher</button>
+          <button type="button" onclick="zelleThisMonth()">Ce mois</button>
+          <button type="button" onclick="window.print()">Imprimer / PDF</button>
+        </div>
+        <p class="muted" style="font-size:12px; margin-top:10px;">Chaque opération Zelle validée (USD ou HTG) ajoute sa <strong>dette</strong> : le montant brut en dollars. Chaque <strong>dépôt sur BUH</strong> la diminue. Une période peut couvrir jusqu'à 6 mois.</p>
+      </div>
+      <div id="zelMsg" class="info"></div>
+      <div class="hist-totals" id="zelTotals"></div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Date</th><th>Heure</th><th>Référence</th><th>Libellé</th><th>Dette Zelle</th><th>Dépôt sur BUH</th><th>Balance dettes Zelle</th><th class="no-print"></th></tr></thead>
+          <tbody id="zelBody"><tr class="empty-row"><td colspan="8">Choisissez une période puis touchez « Afficher ».</td></tr></tbody>
+        </table>
+      </div>
+      <div class="set-card no-print" id="zelAdmin" style="display: none; margin-top: 14px;">
+        <h3 style="font-size: 15px; margin-bottom: 8px;">Enregistrer un dépôt sur BUH <span class="muted" id="zelAdminName"></span></h3>
+        <div class="hist-filters">
+          <div><label for="zelDepDate">Date du dépôt</label><input type="date" id="zelDepDate"></div>
+          <div><label for="zelDepMontant">Montant déposé (USD)</label><input type="number" step="0.01" min="0.01" id="zelDepMontant" placeholder="0.00"></div>
+          <div class="full"><label for="zelDepLib">Libellé</label><input type="text" id="zelDepLib" maxlength="120" placeholder="Ex. : Dépôt BUH, bordereau n° 1234"></div>
+        </div>
+        <div class="hist-actions"><button type="button" class="primary" id="zelDepBtn" onclick="saveZelleDepot()">Enregistrer le dépôt</button></div>
+        <h3 style="font-size: 15px; margin: 18px 0 8px;">Solde d'ouverture de la dette <span class="muted" id="zelAdminName2"></span></h3>
+        <p class="muted" style="font-size:12px;" id="zelOpenNote"></p>
+        <div class="hist-filters">
+          <div><label for="zelOpenDate">À partir du</label><input type="date" id="zelOpenDate"></div>
+          <div><label for="zelOpenMontant">Dette déjà existante (USD)</label><input type="number" step="0.01" min="0" id="zelOpenMontant" placeholder="0.00"></div>
+        </div>
+        <div class="hist-actions"><button type="button" id="zelOpenBtn" onclick="saveZelleOuverture()">Définir le solde d'ouverture</button></div>
+      </div>
+    </div>
+
     <div id="view-parametres" class="view-section">
       <h2 class="section-title">Paramètres du Système</h2>
       <div class="set-card">
@@ -1639,6 +1700,7 @@
         <li class="dropdown-item" data-view="rapport" data-label="Rapport de synthèse" onclick="switchView('rapport', this)">📊 Rapport de synthèse</li>
         <li class="dropdown-item" data-view="cloture" data-label="Rapport de clôture" onclick="switchView('cloture', this)">🧾 Rapport de clôture</li>
         <li class="dropdown-item" data-view="bilan" data-label="Bilan physique de caisse" onclick="switchView('bilan', this)">💰 Bilan physique de caisse</li>
+        <li class="dropdown-item" data-view="zelle" data-label="Relevé Compte Zelle" onclick="switchView('zelle', this)">💳 Relevé Compte Zelle</li>
         <li class="dropdown-item" data-view="parametres" data-label="Paramètres" onclick="switchView('parametres', this)">⚙️ Paramètres</li>
       </ul>
     </div>
@@ -1655,10 +1717,12 @@
         <button class="modal-close" onclick="closeModal('zelleusd')">✕</button>
       </div>
       <form onsubmit="saveZelleUSD(event)">
-        <div class="form-group"><label>Type d'opération</label><select id="zuType"><option value="Paiement">Paiement (- Caisse USD)</option><option value="Envoi">Envoi (+ Caisse USD)</option></select></div>
+        <div class="form-group"><label>Type d'opération</label><select id="zuType"><option value="Paiement">Paiement (- Caisse USD, montant net)</option><option value="Envoi">Envoi (+ Caisse USD, montant brut)</option></select></div>
         <div class="form-group"><label>Expéditeur</label><input type="text" id="zuExp" placeholder="Nom de l'expéditeur" required></div>
         <div class="form-group"><label>Bénéficiaire</label><input type="text" id="zuBen" placeholder="Nom du bénéficiaire" required></div>
-        <div class="form-group"><label>Montant US ($)</label><input type="number" step="0.01" min="0.01" id="zuMontantUS" placeholder="0.00" required></div>
+        <div class="form-group"><label>Montant brut USD ($) : impacte la caisse USD pour un Envoi</label><input type="number" step="0.01" min="0.01" id="zuBrut" placeholder="0.00" oninput="zelleCalc('zu','brut')" required></div>
+        <div class="form-group"><label>Frais ($) : 10 % automatique, modifiable</label><input type="number" step="0.01" min="0" id="zuFrais" placeholder="0.00" oninput="zelleCalc('zu','frais')"></div>
+        <div class="form-group"><label>Montant net USD ($) : impacte la caisse USD pour un Paiement, modifiable</label><input type="number" step="0.01" min="0.01" id="zuNet" placeholder="0.00" oninput="zelleCalc('zu','net')"></div>
         <div class="form-group"><label>Ordonnateur</label><select id="zuAuteur"><option value="Ocgénor">Ocgénor</option><option value="Osmin">Osmin</option></select></div>
         <div class="form-group"><label>Statut</label><select id="zuStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
         <button type="submit" class="btn-submit" style="background: #6b21a8;">Enregistrer Zelle USD</button>
@@ -1674,12 +1738,14 @@
         <button class="modal-close" onclick="closeModal('zellehtg')">✕</button>
       </div>
       <form onsubmit="saveZelleHTG(event)">
-        <div class="form-group"><label>Type d'opération</label><select id="zhType"><option value="Paiement">Paiement (- Caisse HTG)</option><option value="Envoi">Envoi (+ Caisse HTG)</option></select></div>
+        <div class="form-group"><label>Type d'opération</label><select id="zhType"><option value="Paiement">Paiement (- Caisse HTG)</option></select></div>
         <div class="form-group"><label>Expéditeur</label><input type="text" id="zhExp" placeholder="Nom de l'expéditeur" required></div>
         <div class="form-group"><label>Bénéficiaire</label><input type="text" id="zhBen" placeholder="Nom du bénéficiaire" required></div>
-        <div class="form-group"><label>Montant US ($)</label><input type="number" step="0.01" min="0.01" id="zhMontantUS" placeholder="0.00" oninput="calculateZelleHTG()" required></div>
-        <div class="form-group"><label>Taux Zelle (automatique)</label><input type="text" id="zhTaux" readonly style="background: #f1f5f9; font-weight: 700;"></div>
-        <div class="form-group"><label>Montant HTG (calculé, impacte la caisse)</label><input type="text" id="zhMontantHTG" readonly style="background: #f1f5f9; font-weight: 700;"></div>
+        <div class="form-group"><label>Montant brut USD ($)</label><input type="number" step="0.01" min="0.01" id="zhBrut" placeholder="0.00" oninput="zelleCalc('zh','brut')" required></div>
+        <div class="form-group"><label>Frais ($) : 10 % automatique, modifiable</label><input type="number" step="0.01" min="0" id="zhFrais" placeholder="0.00" oninput="zelleCalc('zh','frais')"></div>
+        <div class="form-group"><label>Montant net USD ($) : modifiable</label><input type="number" step="0.01" min="0.01" id="zhNet" placeholder="0.00" oninput="zelleCalc('zh','net')"></div>
+        <div class="form-group"><label>Taux Zelle : automatique, modifiable</label><input type="number" step="0.01" min="0.01" id="zhTaux" oninput="zelleCalc('zh','taux')" style="font-weight: 700;"></div>
+        <div class="form-group"><label>Montant payé HTG (net × taux, impacte la caisse HTG) : modifiable</label><input type="number" step="0.01" min="0.01" id="zhMontantHTG" oninput="zelleCalc('zh','htg')" style="font-weight: 700;"></div>
         <div class="form-group"><label>Ordonnateur</label><select id="zhAuteur"><option value="Ocgénor">Ocgénor</option><option value="Osmin">Osmin</option></select></div>
         <div class="form-group"><label>Statut</label><select id="zhStatut"><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Refusé">Refusé</option><option value="Annulé">Annulé</option></select></div>
         <button type="submit" class="btn-submit" style="background: #be185d;">Enregistrer Zelle HTG</button>
@@ -1853,7 +1919,7 @@
     // Les opérations du jour et le solde d'ouverture viennent de Firebase (partagés entre tous les appareils).
     let transactionsData = [];   // opérations du jour courant
     let openings = {};           // solde d'ouverture enregistré : { 'AAAA-MM-JJ': { HTG, USD, manuel } }
-    let carry = { HTG: 0, USD: 0, NAT: 0 }; // fermeture du dernier jour précédent (en centimes)
+    let carry = { HTG: 0, USD: 0, NAT: 0, COM: 0 }; // fermeture du dernier jour précédent (en centimes)
 
     // Listes modifiables par l'administrateur (Paramètres). Valeurs de départ si rien n'est encore enregistré.
     // Motif réservé : une sortie de caisse avec ce motif augmente le compte Natcash de l'agence.
@@ -2062,6 +2128,7 @@
       document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewName).classList.add('active');
       if (viewName === 'historique') initHistory();
+      if (viewName === 'zelle') initZelle();
       if (viewName === 'rapport' || viewName === 'cloture' || viewName === 'bilan') initReportControls();
       if (viewName === 'bilan') document.getElementById('bilanSave').style.display = currentRole === 'dirigeant' ? 'none' : 'block';
       if (viewName === 'parametres' && currentRole === 'admin') { renderListesAdmin(); renderBackupInfo(); const bm = document.getElementById('bkMonth'); if (!bm.value) bm.value = todayStr().slice(0, 7); }
@@ -2274,8 +2341,10 @@
     // Ferme tout : surveillances, données affichées, retour à la page de connexion
     function clearSession() {
       if (window.FB) FB.stopWatching();
-      transactionsData = []; openings = {}; carry = { HTG: 0, USD: 0, NAT: 0 };
-      histAll = []; histReady = false;
+      transactionsData = []; openings = {}; carry = { HTG: 0, USD: 0, NAT: 0, COM: 0 };
+      histAll = []; histReady = false; zelOrd = ''; zelData = null; zelDepCancelId = null;
+      ['zelFrom', 'zelTo', 'zelDepDate', 'zelOpenDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('zelBody').innerHTML = '<tr class="empty-row"><td colspan="8">Choisissez une période puis touchez « Afficher ».</td></tr>'; document.getElementById('zelTotals').innerHTML = '';
       rapView = null; cloView = null; lastBackup = null; sharedTaux = null;
       listes = JSON.parse(JSON.stringify(DEFAULT_LISTES));
       document.getElementById('tauxBRH').readOnly = false;
@@ -2318,7 +2387,7 @@
       }, fail);
       FB.watchSolde(day, sd => {
         if (day !== currentDay) return;
-        if (sd) openings[day] = { HTG: sd.HTG, USD: sd.USD, NAT: sd.NAT, manuel: !!sd.manuel }; else delete openings[day];
+        if (sd) openings[day] = { HTG: sd.HTG, USD: sd.USD, NAT: sd.NAT, COM: sd.COM, manuel: !!sd.manuel }; else delete openings[day];
         refreshAll();
       }, fail);
       try {
@@ -2327,8 +2396,8 @@
         if (prev) {
           const ops = await FB.getOpsOfDay(prev.day);
           const f = flowsOfList(ops);
-          carry = { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD, NAT: natCarry(prev, ops) };
-        } else carry = { HTG: 0, USD: 0, NAT: 0 };
+          carry = { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD, NAT: natCarry(prev, ops), COM: comCarry(prev, ops) };
+        } else carry = { HTG: 0, USD: 0, NAT: 0, COM: 0 };
         refreshAll();
       } catch (err) { fail(err); }
     }
@@ -2340,7 +2409,7 @@
     function openCancel(id) {
       const t = transactionsData.find(x => x.id === id);
       if (!t || !canCancel(t)) return;
-      cancelId = id;
+      cancelId = id; zelDepCancelId = null;
       document.getElementById('cancelInfo').innerHTML = 'Opération <strong>' + esc(t.ref) + '</strong> — ' + esc(t.typeInfo) + ' — ' + amountCell(t);
       document.getElementById('cancelMotif').value = '';
       document.getElementById('modal-cancel').classList.add('active');
@@ -2348,6 +2417,14 @@
     async function confirmCancel() {
       const motif = val('cancelMotif');
       if (!motif) { alert("Le motif de l'annulation est obligatoire."); return; }
+      if (zelDepCancelId) {
+        const btn0 = document.getElementById('cancelBtn'); btn0.disabled = true;
+        try {
+          await FB.cancelDepot(zelDepCancelId, { motif, par: currentCashier.name, uid: currentCashier.uid, at: nowD().toISOString() });
+          zelDepCancelId = null; closeModal('cancel'); await runZelle();
+        } catch (err) { alert("Annulation impossible : " + friendlyError(err)); }
+        btn0.disabled = false; return;
+      }
       const t = transactionsData.find(x => x.id === cancelId);
       if (!t || !canCancel(t)) { closeModal('cancel'); return; }
       const btn = document.getElementById('cancelBtn'); btn.disabled = true;
@@ -2356,6 +2433,157 @@
         closeModal('cancel');
       } catch (err) { alert("Annulation impossible : " + friendlyError(err)); }
       btn.disabled = false;
+    }
+
+    // ===== Relevé Compte Zelle =====
+    // Dette = montant brut USD de chaque opération Zelle validée de l'ordonnateur ; dépôt = argent versé sur le compte BUH.
+    let zelOrd = '', zelData = null, zelDepCancelId = null;
+    const ZEL_START = '2020-01-01';
+    const zelleNames = () => listes.ordonnateurs.slice();
+    function zelleThisMonth(silent) {
+      document.getElementById('zelFrom').value = todayStr().slice(0, 8) + '01';
+      document.getElementById('zelTo').value = todayStr();
+      if (!silent) runZelle();
+    }
+    function initZelle() {
+      const names = zelleNames();
+      if (!zelOrd || !names.includes(zelOrd)) zelOrd = names[0] || '';
+      if (!document.getElementById('zelFrom').value) zelleThisMonth(true);
+      document.getElementById('zelAdmin').style.display = currentRole === 'admin' ? '' : 'none';
+      const dd = document.getElementById('zelDepDate'); dd.max = todayStr(); if (!dd.value) dd.value = todayStr();
+      const od = document.getElementById('zelOpenDate'); od.max = todayStr(); if (!od.value) od.value = todayStr();
+      renderZelTabs();
+      runZelle();
+    }
+    function renderZelTabs() {
+      document.getElementById('zelTabs').innerHTML = zelleNames().map((n, i) =>
+        `<button type="button" class="${n === zelOrd ? 'primary' : ''}" onclick="selectZelle(${i})">Relevé Compte Zelle ${esc(n)}</button>`).join('');
+      document.getElementById('zelTitle').innerText = 'Relevé Compte Zelle' + (zelOrd ? ' : ' + zelOrd : '');
+      ['zelAdminName', 'zelAdminName2'].forEach(id => { document.getElementById(id).innerText = zelOrd ? '(' + zelOrd + ')' : ''; });
+    }
+    function selectZelle(i) { zelOrd = zelleNames()[i] || ''; renderZelTabs(); runZelle(); }
+
+    async function runZelle() {
+      const from = document.getElementById('zelFrom').value, to = document.getElementById('zelTo').value, name = zelOrd;
+      if (!name) { setMsg('zelMsg', 'Aucun ordonnateur : ajoutez-en dans Paramètres.'); return; }
+      if (!from || !to) { setMsg('zelMsg', 'Choisissez la date de début et la date de fin.'); return; }
+      if (from > to) { setMsg('zelMsg', 'La date de début doit être avant la date de fin.'); return; }
+      if (daysBetween(from, to) > HIST_MAX_DAYS) { setMsg('zelMsg', 'Période trop longue : 6 mois maximum par recherche. Réduisez la période.'); return; }
+      if (!window.FB || !loggedIn) { setMsg('zelMsg', 'Connexion au serveur indisponible.'); return; }
+      const btn = document.getElementById('zelBtn'); btn.disabled = true; btn.innerText = 'Chargement…';
+      setMsg('zelMsg', 'Chargement…', true);
+      try {
+        const cfg = (await FB.getConfig('zelleOuverture')) || {};
+        const o = cfg[name] || null;
+        const start = o && o.day ? o.day : ZEL_START;
+        const [ops, deps] = await Promise.all([FB.getOpsRange(start, to), FB.getDepotsRange(start, to)]);
+        if (name !== zelOrd) return;   // l'utilisateur a changé d'onglet pendant le chargement
+        zelData = { name, from, to, o, ops, deps };
+        renderZelle();
+        setMsg('zelMsg', '');
+      } catch (err) { setMsg('zelMsg', 'Chargement impossible : ' + friendlyError(err)); }
+      finally { btn.disabled = false; btn.innerText = 'Afficher'; }
+    }
+
+    function zelLibelle(t) {
+      return t.service + ' ' + (t.type || '') + (t.exp || t.ben ? ' : ' + (t.exp || '?') + ' → ' + (t.ben || '?') : '');
+    }
+    // Écritures de l'ordonnateur, dans l'ordre du temps, avec la balance cumulée
+    function zelleLedger(d) {
+      const e = [];
+      d.ops.filter(t => t.status === 'Validé' && (t.service === 'Zelle USD' || t.service === 'Zelle HTG') && t.auteur === d.name)
+        .forEach(t => e.push({ kind: 'dette', day: t.day, ts: t.ts, ref: t.ref, libelle: zelLibelle(t), dette: toCents(brutOf(t)), depot: 0 }));
+      d.deps.filter(x => x.ordonnateur === d.name)
+        .forEach(x => e.push({ kind: 'depot', id: x.id, day: x.day, ts: x.ts, ref: x.ref, libelle: x.libelle || 'Dépôt sur BUH', dette: 0, depot: toCents(x.montant), annule: x.status === 'Annulé', motif: x.annulation && x.annulation.motif, par: x.annulation && x.annulation.par }));
+      e.sort((a, b) => a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0);
+      const opening = d.o ? toCents(d.o.montant) : 0;
+      let bal = opening, reporte = opening;
+      const rows = [];
+      e.forEach(x => {
+        if (!x.annule) bal += x.dette - x.depot;
+        x.bal = bal;
+        if (x.day < d.from) { if (!x.annule) reporte = bal; }
+        else if (x.day <= d.to) rows.push(x);
+      });
+      const tot = { dette: 0, depot: 0 };
+      rows.forEach(x => { if (!x.annule) { tot.dette += x.dette; tot.depot += x.depot; } });
+      return { rows, reporte, tot, fin: reporte + tot.dette - tot.depot, opening };
+    }
+    function renderZelle() {
+      const d = zelData; if (!d) return;
+      const L = zelleLedger(d);
+      const canAct = currentRole === 'admin';
+      const openLabel = d.o && d.o.day >= d.from
+        ? `Solde d'ouverture au ${new Date(d.o.day + 'T12:00:00').toLocaleDateString('fr-FR')}`
+        : 'Solde reporté au ' + new Date(d.from + 'T12:00:00').toLocaleDateString('fr-FR');
+      document.getElementById('zelTotals').innerHTML = `
+        <div class="hist-total">${openLabel.startsWith('Solde d') ? 'Solde d\'ouverture' : 'Solde reporté'}<strong>${usd(L.reporte / 100)}</strong></div>
+        <div class="hist-total">Dettes Zelle (période)<strong>${usd(L.tot.dette / 100)}</strong></div>
+        <div class="hist-total">Dépôts sur BUH (période)<strong>${usd(L.tot.depot / 100)}</strong></div>
+        <div class="hist-total">Balance dettes Zelle<strong style="color: ${L.fin > 0 ? 'var(--danger-red)' : 'var(--success-green)'};">${usd(L.fin / 100)}</strong><small class="muted">reste à déposer sur BUH</small></div>`;
+      const dt = ts => { const x = new Date(ts); return [x.toLocaleDateString('fr-FR', { timeZone: HT_TZ }), x.toLocaleTimeString('fr-FR', { timeZone: HT_TZ })]; };
+      let html = `<tr style="background: var(--bg-main, #f1f5f9);"><td colspan="3"><strong>${esc(openLabel)}</strong></td><td></td><td></td><td></td><td><strong>${usd(L.reporte / 100)}</strong></td><td class="no-print"></td></tr>`;
+      if (!L.rows.length) html += '<tr class="empty-row"><td colspan="8">Aucune écriture sur cette période.</td></tr>';
+      html += L.rows.map(x => {
+        const [dd, hh] = dt(x.ts);
+        const st = x.annule ? ' style="text-decoration: line-through; opacity: .55;"' : '';
+        const act = x.kind === 'depot' && canAct && !x.annule ? `<button type="button" class="btn-mini" onclick="openCancelDepot('${esc(x.id)}')">Annuler</button>` : '';
+        const note = x.annule ? `<br><small class="muted">Annulé${x.par ? ' par ' + esc(x.par) : ''}${x.motif ? ' : ' + esc(x.motif) : ''}</small>` : '';
+        return `<tr><td${st}>${dd}</td><td${st}>${hh}</td><td${st}>${esc(x.ref)}</td><td${st}>${esc(x.libelle)}</td>
+          <td${st}>${x.dette ? usd(x.dette / 100) : ''}</td><td${st}>${x.depot ? usd(x.depot / 100) : ''}</td>
+          <td>${x.annule ? '' : usd(x.bal / 100)}${note}</td><td class="no-print">${act}</td></tr>`;
+      }).join('');
+      html += `<tr style="font-weight: 800;"><td colspan="4">Totaux de la période</td><td>${usd(L.tot.dette / 100)}</td><td>${usd(L.tot.depot / 100)}</td><td>${usd(L.fin / 100)}</td><td class="no-print"></td></tr>`;
+      document.getElementById('zelBody').innerHTML = html;
+      const note = document.getElementById('zelOpenNote');
+      if (note) note.innerText = d.o ? `Actuel : ${usd(toCents(d.o.montant) / 100)} à partir du ${new Date(d.o.day + 'T12:00:00').toLocaleDateString('fr-FR')}. Les écritures avant cette date ne sont plus comptées.` : "Aucun solde d'ouverture défini : la dette de départ est 0.";
+    }
+
+    async function saveZelleDepot() {
+      if (currentRole !== 'admin') return;
+      const name = zelOrd, day = document.getElementById('zelDepDate').value, m = parseFloat(document.getElementById('zelDepMontant').value);
+      let lib = val('zelDepLib');
+      if (!name) { alert('Choisissez un ordonnateur.'); return; }
+      if (!isFinite(m) || m <= 0) { alert('Montant invalide : il doit être supérieur à 0.'); return; }
+      if (!day) { alert('Choisissez la date du dépôt.'); return; }
+      if (navigator.onLine === false) { alert('Pas de connexion internet : le dépôt doit être enregistré en ligne.'); return; }
+      if (!clockSynced) await syncClock(4000);
+      ensureToday();
+      if (day > currentDay) { alert('La date du dépôt ne peut pas être dans le futur.'); return; }
+      if (!lib) lib = 'Dépôt sur BUH';
+      const ts = day === currentDay ? nowD().toISOString() : day + 'T17:00:00.000Z';
+      const ref = 'BUH-' + String(Date.now()).slice(-8);
+      const btn = document.getElementById('zelDepBtn'); btn.disabled = true;
+      try {
+        await FB.addDepot({ ordonnateur: name, day, ts, ref, libelle: lib, montant: round2(m), status: 'Validé', uid: currentCashier.uid, cashier: { name: currentCashier.name, email: currentCashier.email } });
+        document.getElementById('zelDepMontant').value = ''; document.getElementById('zelDepLib').value = '';
+        await runZelle();
+      } catch (err) { alert("Le dépôt n'a PAS été enregistré : " + friendlyError(err)); }
+      btn.disabled = false;
+    }
+    async function saveZelleOuverture() {
+      if (currentRole !== 'admin') return;
+      const name = zelOrd, day = document.getElementById('zelOpenDate').value, m = parseFloat(document.getElementById('zelOpenMontant').value);
+      if (!name) { alert('Choisissez un ordonnateur.'); return; }
+      if (!isFinite(m) || m < 0) { alert('Montant invalide : entrez un nombre positif (ou 0).'); return; }
+      if (!day || day > todayStr()) { alert('Choisissez une date valide (aujourd\'hui ou avant).'); return; }
+      if (!confirm('Définir la dette existante de ' + name + ' à ' + usd(m) + ' à partir du ' + new Date(day + 'T12:00:00').toLocaleDateString('fr-FR') + ' ?\nLes écritures avant cette date ne seront plus comptées.')) return;
+      try {
+        const cfg = (await FB.getConfig('zelleOuverture')) || {};
+        cfg[name] = { montant: round2(m), day, par: currentCashier.name, at: nowD().toISOString() };
+        await FB.setConfig('zelleOuverture', cfg);
+        document.getElementById('zelOpenMontant').value = '';
+        await runZelle();
+      } catch (err) { alert("Le solde d'ouverture n'a PAS été enregistré : " + friendlyError(err)); }
+    }
+    function openCancelDepot(id) {
+      if (currentRole !== 'admin' || !zelData) return;
+      const x = zelData.deps.find(y => y.id === id);
+      if (!x || x.status === 'Annulé') return;
+      cancelId = null; zelDepCancelId = id;
+      document.getElementById('cancelInfo').innerHTML = 'Dépôt <strong>' + esc(x.ref) + '</strong> — ' + esc(x.ordonnateur) + ' — ' + usd(x.montant);
+      document.getElementById('cancelMotif').value = '';
+      document.getElementById('modal-cancel').classList.add('active');
     }
     async function deleteOpAdmin(id) {
       if (currentRole !== 'admin') return;
@@ -2544,11 +2772,57 @@
       });
     }
 
+    // Zelle : brut → frais (10 %) → net → (HTG = net × taux). Chaque champ reste modifiable ;
+    // modifier un champ recalcule ceux qui en dépendent.
+    const ZELLE_FRAIS_PCT = 0.10;
+    function zelleCalc(pfx, from) {
+      const el = id => document.getElementById(pfx + id);
+      const num = id => { const v = parseFloat(el(id).value); return isFinite(v) ? v : NaN; };
+      const put = (id, v) => { el(id).value = isFinite(v) ? v.toFixed(2) : ''; };
+      let brut = num('Brut'), frais = num('Frais'), net = num('Net');
+      if (from === 'brut') {
+        if (isFinite(brut)) { frais = round2(brut * ZELLE_FRAIS_PCT); net = round2(brut - frais); put('Frais', frais); put('Net', net); }
+        else { el('Frais').value = ''; el('Net').value = ''; }
+      } else if (from === 'frais') {
+        if (isFinite(brut) && isFinite(frais)) { net = round2(brut - frais); put('Net', net); }
+      } else if (from === 'net') {
+        if (isFinite(brut) && isFinite(net)) { frais = round2(brut - net); put('Frais', frais); }
+      }
+      if (pfx === 'zh' && from !== 'htg') {
+        const taux = num('Taux');
+        net = num('Net');
+        const h = el('MontantHTG');
+        h.value = (isFinite(net) && isFinite(taux) && net > 0) ? round2(net * taux).toFixed(2) : '';
+      }
+    }
+    // Lit et vérifie les montants d'un formulaire Zelle ; renvoie { erreur } ou les montants.
+    function readZelle(pfx) {
+      const el = id => document.getElementById(pfx + id);
+      const num = id => { const v = parseFloat(el(id).value); return isFinite(v) ? v : NaN; };
+      let brut = num('Brut');
+      if (!(brut > 0)) return { erreur: 'Montant brut invalide : il doit être supérieur à 0.' };
+      let frais = num('Frais'), net = num('Net');
+      if (!isFinite(frais) && !isFinite(net)) { frais = round2(brut * ZELLE_FRAIS_PCT); net = round2(brut - frais); }
+      else if (!isFinite(net)) net = round2(brut - frais);
+      else if (!isFinite(frais)) frais = round2(brut - net);
+      brut = round2(brut); frais = round2(frais); net = round2(net);
+      if (frais < 0) return { erreur: 'Les frais ne peuvent pas être négatifs.' };
+      if (!(net > 0)) return { erreur: 'Le montant net doit être supérieur à 0 (les frais sont trop élevés).' };
+      if (Math.abs(brut - frais - net) > 0.011) return { erreur: 'Le montant net doit être égal au brut moins les frais. Corrigez les montants.' };
+      const r = { brut, frais, net };
+      if (pfx === 'zh') {
+        const taux = num('Taux');
+        if (!(taux > 0)) return { erreur: 'Taux invalide.' };
+        let htg = num('MontantHTG');
+        if (!isFinite(htg)) htg = round2(net * taux);
+        if (!(htg > 0)) return { erreur: 'Montant HTG invalide : il doit être supérieur à 0.' };
+        r.taux = round2(taux); r.htg = round2(htg);
+      }
+      return r;
+    }
     function calculateZelleHTG() {
-      const taux = getTauxZelle();
-      const montantUS = parseFloat(document.getElementById('zhMontantUS').value) || 0;
-      document.getElementById('zhTaux').value = fmt(taux);
-      document.getElementById('zhMontantHTG').value = fmt(round2(montantUS * taux)) + " HTG";
+      document.getElementById('zhTaux').value = getTauxZelle().toFixed(2);
+      zelleCalc('zh', 'taux');
     }
 
     // ===== Caisse =====
@@ -2590,6 +2864,9 @@
     }
     // Fermeture Natcash d'un jour précédent ; si ce jour n'a jamais eu de solde Natcash (ancien enregistrement), on repart de 0.
     const natCarry = (prev, ops) => prev.NAT == null ? 0 : toCents(prev.NAT) + natNet(ops);
+    // Commissions Natcash (compte séparé du solde) : somme des commissions des opérations Natcash validées, en centimes.
+    const comNet = list => list.filter(t => t.status === 'Validé' && t.service === 'Natcash').reduce((a, t) => a + toCents(t.commission || 0), 0);
+    const comCarry = (prev, ops) => prev.COM == null ? 0 : toCents(prev.COM) + comNet(ops);
     const natNet = list => { const p = natParts(list); return p.retraits + p.recharges - p.depots; };
 
     // Mouvement net (en centimes) des opérations validées d'un jour donné
@@ -2606,16 +2883,18 @@
 
     // Solde d'ouverture d'un jour (en centimes) : saisi à la main, sinon fermeture du dernier jour précédent connu
     function openingOf(day) {
-      const nat = openings[day] && openings[day].NAT != null ? toCents(openings[day].NAT) : carry.NAT;
-      if (openings[day]) return { HTG: toCents(openings[day].HTG), USD: toCents(openings[day].USD), NAT: nat };
-      return { HTG: carry.HTG, USD: carry.USD, NAT: carry.NAT };
+      const o = openings[day];
+      const nat = o && o.NAT != null ? toCents(o.NAT) : carry.NAT;
+      const com = o && o.COM != null ? toCents(o.COM) : carry.COM;
+      if (o) return { HTG: toCents(o.HTG), USD: toCents(o.USD), NAT: nat, COM: com };
+      return { HTG: carry.HTG, USD: carry.USD, NAT: carry.NAT, COM: carry.COM };
     }
 
     async function saveOpening(devise, raw) {
       if (currentRole !== 'admin') { updateCaisseDisplay(); return; }
       const v = parseFloat(raw);
       const cur = openingOf(currentDay);
-      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: cur.NAT / 100, manuel: true };
+      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: cur.NAT / 100, COM: cur.COM / 100, manuel: true };
       next[devise] = isFinite(v) ? round2(v) : 0;
       try { await FB.setSolde(currentDay, next); }
       catch (err) { alert("Impossible d'enregistrer le solde d'ouverture : " + friendlyError(err)); updateCaisseDisplay(); }
@@ -2627,9 +2906,20 @@
       const v = parseFloat(raw);
       if (!isFinite(v) || v < 0) { alert('Solde invalide : entrez un nombre positif (ou 0).'); updateRapport(); return; }
       const cur = openingOf(currentDay);
-      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: round2(v), manuel: !!(openings[currentDay] && openings[currentDay].manuel) };
+      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: round2(v), COM: cur.COM / 100, manuel: !!(openings[currentDay] && openings[currentDay].manuel) };
       try { await FB.setSolde(currentDay, next); }
       catch (err) { alert("Impossible d'enregistrer le solde d'ouverture Natcash : " + friendlyError(err)); updateRapport(); }
+    }
+
+    // Commissions d'ouverture Natcash (saisies par l'administrateur, puis reportées chaque jour)
+    async function saveOpeningCom(raw) {
+      if (currentRole !== 'admin' || rapView) { updateRapport(); return; }
+      const v = parseFloat(raw);
+      if (!isFinite(v) || v < 0) { alert('Montant invalide : entrez un nombre positif (ou 0).'); updateRapport(); return; }
+      const cur = openingOf(currentDay);
+      const next = { HTG: cur.HTG / 100, USD: cur.USD / 100, NAT: cur.NAT / 100, COM: round2(v), manuel: !!(openings[currentDay] && openings[currentDay].manuel) };
+      try { await FB.setSolde(currentDay, next); }
+      catch (err) { alert("Impossible d'enregistrer les commissions d'ouverture : " + friendlyError(err)); updateRapport(); }
     }
 
     // Caisse d'une liste d'opérations avec un solde d'ouverture donné (en centimes)
@@ -2654,14 +2944,13 @@
     async function openingForDay(day) {
       if (day === currentDay) return openingOf(day);
       const sd = await FB.getSolde(day);
-      if (sd && sd.NAT != null) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD), NAT: toCents(sd.NAT) };
+      if (sd && sd.NAT != null && sd.COM != null) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD), NAT: toCents(sd.NAT), COM: toCents(sd.COM) };
       const prev = await FB.getLatestSoldeBefore(day);
-      if (!prev) return { HTG: sd ? toCents(sd.HTG) : 0, USD: sd ? toCents(sd.USD) : 0, NAT: 0 };
-      const ops = await FB.getOpsOfDay(prev.day);
-      const f = flowsOfList(ops);
-      const nat = natCarry(prev, ops);
-      if (sd) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD), NAT: nat };
-      return { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD, NAT: nat };
+      let nat = 0, com = 0, f = { HTG: 0, USD: 0 };
+      if (prev) { const ops = await FB.getOpsOfDay(prev.day); f = flowsOfList(ops); nat = natCarry(prev, ops); com = comCarry(prev, ops); }
+      if (sd) return { HTG: toCents(sd.HTG), USD: toCents(sd.USD), NAT: sd.NAT != null ? toCents(sd.NAT) : nat, COM: sd.COM != null ? toCents(sd.COM) : com };
+      if (!prev) return { HTG: 0, USD: 0, NAT: 0, COM: 0 };
+      return { HTG: toCents(prev.HTG) + f.HTG, USD: toCents(prev.USD) + f.USD, NAT: nat, COM: com };
     }
 
     function updateCaisseDisplay() {
@@ -2739,11 +3028,13 @@
       if (t.exp || t.ben) parts.push((t.exp || '?') + ' → ' + (t.ben || '?'));
       if (t.tel) parts.push(t.tel);
       if (t.client) parts.push(t.client);
+      if (t.service.indexOf('Zelle') === 0 && t.brutUSD != null) parts.push('Brut ' + usd(t.brutUSD) + ' • Frais ' + usd(t.fraisUSD || 0) + ' • Net ' + usd(t.netUSD != null ? t.netUSD : t.montantUSD));
       if (t.service.indexOf('Zelle') === 0 && t.auteur) parts.push('Ordonnateur : ' + t.auteur);
       if (t.libelle) parts.push(t.libelle);
       return parts.join(' • ');
     }
 
+    const brutOf = t => t.brutUSD != null ? t.brutUSD : t.montantUSD;
     function amountCell(t) {
       const parts = [];
       if (t.montantHTG != null) parts.push(htg(t.montantHTG));
@@ -2820,7 +3111,7 @@
       // Les écritures partent dans l'ordre ; sans internet elles sont gardées sur l'appareil puis envoyées automatiquement.
       if (!openings[day]) {
         const o = openingOf(day);
-        FB.setSolde(day, { HTG: o.HTG / 100, USD: o.USD / 100, NAT: o.NAT / 100, manuel: false }).catch(() => { /* déjà créé par un autre appareil */ });
+        FB.setSolde(day, { HTG: o.HTG / 100, USD: o.USD / 100, NAT: o.NAT / 100, COM: o.COM / 100, manuel: false }).catch(() => { /* déjà créé par un autre appareil */ });
       }
       FB.addOp(data).catch(err => alert("L'opération " + data.ref + " n'a PAS été enregistrée : " + friendlyError(err)));
       return true;
@@ -2906,11 +3197,11 @@
     function exportHistory() {
       const rows = histFiltered();
       if (!rows.length) { alert('Rien à exporter : lancez une recherche.'); return; }
-      const head = ['Référence', 'Date', 'Heure', 'Service', 'Type', 'Expéditeur', 'Bénéficiaire', 'Téléphone', 'Montant HTG', 'Montant USD', 'Taux', 'Commission', 'Caissier', 'Statut', 'Motif annulation'];
+      const head = ['Référence', 'Date', 'Heure', 'Service', 'Type', 'Expéditeur', 'Bénéficiaire', 'Téléphone', 'Montant HTG', 'Montant USD', 'Brut USD', 'Frais USD', 'Taux', 'Commission', 'Caissier', 'Statut', 'Motif annulation'];
       const lines = [head.map(csvCell).join(';')].concat(rows.map(t => {
         const d = new Date(t.ts);
         return [t.ref, d.toLocaleDateString('fr-FR'), d.toLocaleTimeString('fr-FR'), SERVICE_NAMES[t.service] || t.service, t.typeInfo, t.exp, t.ben, t.tel,
-          t.montantHTG, t.montantUSD, t.taux, t.commission, t.cashier && t.cashier.name, t.status, t.annulation && t.annulation.motif].map(csvCell).join(';');
+          t.montantHTG, t.montantUSD, t.brutUSD, t.fraisUSD, t.taux, t.commission, t.cashier && t.cashier.name, t.status, t.annulation && t.annulation.motif].map(csvCell).join(';');
       }));
       const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
       const a = document.createElement('a');
@@ -2920,11 +3211,11 @@
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     }
     function opsCsvText(rows) {
-      const head = ['Référence', 'Date', 'Heure', 'Service', 'Type', 'Expéditeur', 'Bénéficiaire', 'Téléphone', 'Montant HTG', 'Montant USD', 'Taux', 'Commission', 'Caissier', 'Statut', 'Motif annulation'];
+      const head = ['Référence', 'Date', 'Heure', 'Service', 'Type', 'Expéditeur', 'Bénéficiaire', 'Téléphone', 'Montant HTG', 'Montant USD', 'Brut USD', 'Frais USD', 'Taux', 'Commission', 'Caissier', 'Statut', 'Motif annulation'];
       const lines = [head.map(csvCell).join(';')].concat(rows.map(t => {
         const d = new Date(t.ts);
         return [t.ref, d.toLocaleDateString('fr-FR', { timeZone: HT_TZ }), d.toLocaleTimeString('fr-FR', { timeZone: HT_TZ }), SERVICE_NAMES[t.service] || t.service, t.typeInfo, t.exp, t.ben, t.tel,
-          t.montantHTG, t.montantUSD, t.taux, t.commission, t.cashier && t.cashier.name, t.status, t.annulation && t.annulation.motif].map(csvCell).join(';');
+          t.montantHTG, t.montantUSD, t.brutUSD, t.fraisUSD, t.taux, t.commission, t.cashier && t.cashier.name, t.status, t.annulation && t.annulation.motif].map(csvCell).join(';');
       }));
       return '\ufeff' + lines.join('\r\n');
     }
@@ -2979,7 +3270,15 @@
     }
 
     // ===== Rapport de synthèse =====
-    let natTheoCents = 0;
+    let natTheoCents = 0, comTotalCents = 0;
+    function updateComEcart() {
+      const el = document.getElementById('comEcart');
+      const raw = document.getElementById('comReal').value;
+      if (raw === '' || !isFinite(parseFloat(raw))) { el.innerText = '—'; el.style.color = ''; return; }
+      const d = toCents(parseFloat(raw)) - comTotalCents;
+      el.innerText = (d > 0 ? '+' : '') + htg(d / 100);
+      el.style.color = d === 0 ? 'var(--success-green)' : 'var(--danger-red)';
+    }
     function updateNatEcart() {
       const el = document.getElementById('natEcart');
       const raw = document.getElementById('natBalancePhone').value;
@@ -3032,18 +3331,33 @@
       document.getElementById('natDepots').innerText = htg(np.depots / 100);
       document.getElementById('natTheo').innerText = htg(natTheoCents / 100);
       updateNatEcart();
+      // Commissions Natcash (séparées du solde)
+      const comOpen = rapView ? (rapView.open ? rapView.open.COM : 0) : openingOf(currentDay).COM;
+      const comJourC = comNet(nat);
+      comTotalCents = comOpen + comJourC;
+      const ci = document.getElementById('comOpenInput');
+      if (document.activeElement !== ci) ci.value = (comOpen / 100).toFixed(2);
+      ci.disabled = !(currentRole === 'admin' && !rapView);
+      ci.title = ci.disabled ? "Modifiable par l'administrateur, pour la journée en cours seulement." : '';
+      document.getElementById('comJour').innerText = htg(comJourC / 100);
+      document.getElementById('comTotal').innerText = htg(comTotalCents / 100);
+      updateComEcart();
 
       // Zelle USD
       const zu = repValid('Zelle USD');
       document.getElementById('zuVol').innerText = zu.length;
       document.getElementById('zuTotalEnvoye').innerText = usd(sumBy(zu.filter(t => t.type === 'Envoi'), t => t.montantUSD));
       document.getElementById('zuTotalPaye').innerText = usd(sumBy(zu.filter(t => t.type === 'Paiement'), t => t.montantUSD));
+      document.getElementById('zuTotBrut').innerText = usd(sumBy(zu, brutOf));
+      document.getElementById('zuTotFrais').innerText = usd(sumBy(zu, t => t.fraisUSD || 0));
 
       // Zelle HTG
       const zh = repValid('Zelle HTG');
       document.getElementById('zhVol').innerText = zh.length;
       document.getElementById('zhTotalEnvoye').innerText = htg(sumBy(zh.filter(t => t.type === 'Envoi'), t => t.montantHTG));
       document.getElementById('zhTotalPaye').innerText = htg(sumBy(zh.filter(t => t.type === 'Paiement'), t => t.montantHTG));
+      document.getElementById('zhTotBrut').innerText = usd(sumBy(zh, brutOf));
+      document.getElementById('zhTotFrais').innerText = usd(sumBy(zh, t => t.fraisUSD || 0));
 
       // Zelle : montants ordonnés, tout en dollars (le montant USD de chaque opération Zelle HTG
       // vaut son montant HTG divisé par le taux : 26 000 HTG à 130 = 200 $)
@@ -3053,9 +3367,9 @@
       const ordColors = ['#6b21a8', '#0284c7', '#047857', '#be185d', '#b45309', '#4f46e5'];
       let ordTotal = 0;
       document.getElementById('zelOrdRows').innerHTML = ordNames.map((n, i) => {
-        const v = sumBy(zel.filter(t => t.auteur === n), t => t.montantUSD);
+        const v = sumBy(zel.filter(t => t.auteur === n), brutOf);
         ordTotal += toCents(v);
-        return `<div class="metric-row"><span class="metric-label">Total Ordonné par ${esc(n)}</span><span class="metric-value" style="color: ${ordColors[i % ordColors.length]};">${usd(v)}</span></div>`;
+        return `<div class="metric-row"><span class="metric-label">Total Zelle ${esc(n)} (brut)</span><span class="metric-value" style="color: ${ordColors[i % ordColors.length]};">${usd(v)}</span></div>`;
       }).join('');
       document.getElementById('zelOrdTotal').innerText = usd(ordTotal / 100);
 
@@ -3124,8 +3438,8 @@
     // ===== Enregistrement des opérations =====
     function saveZelleUSD(e) {
       e.preventDefault();
-      const montantUS = readAmount('zuMontantUS');
-      if (montantUS === null) { alert('Montant invalide : il doit être supérieur à 0.'); return; }
+      const z = readZelle('zu');
+      if (z.erreur) { alert(z.erreur); return; }
       const type = val('zuType');
       const auteur = val('zuAuteur');
 
@@ -3136,7 +3450,11 @@
         typeInfo: type,
         exp: val('zuExp'),
         ben: val('zuBen'),
-        montantUSD: montantUS,
+        // montantUSD = le montant qui touche la caisse USD : brut pour un Envoi, net pour un Paiement
+        montantUSD: type === 'Envoi' ? z.brut : z.net,
+        brutUSD: z.brut,
+        fraisUSD: z.frais,
+        netUSD: z.net,
         auteur: auteur,
         auteurOrClient: auteur,
         status: val('zuStatut')
@@ -3148,11 +3466,10 @@
 
     function saveZelleHTG(e) {
       e.preventDefault();
-      const montantUS = readAmount('zhMontantUS');
-      if (montantUS === null) { alert('Montant invalide : il doit être supérieur à 0.'); return; }
+      const z = readZelle('zh');
+      if (z.erreur) { alert(z.erreur); return; }
       const type = val('zhType');
       const auteur = val('zhAuteur');
-      const taux = getTauxZelle();
 
       addLogEntry({
         ref: genRef('ZEH'),
@@ -3161,9 +3478,12 @@
         typeInfo: type,
         exp: val('zhExp'),
         ben: val('zhBen'),
-        montantUSD: montantUS,
-        montantHTG: round2(montantUS * taux),
-        taux: taux,
+        montantUSD: z.net,
+        brutUSD: z.brut,
+        fraisUSD: z.frais,
+        netUSD: z.net,
+        montantHTG: z.htg,
+        taux: z.taux,
         auteur: auteur,
         auteurOrClient: auteur,
         status: val('zhStatut')
@@ -3594,6 +3914,14 @@
             unsubCfg[name] = onSnapshot(doc(db, 'config', name), s => onData(s.exists() ? s.data() : null), onError);
           },
           setConfig: (name, data) => setDoc(doc(db, 'config', name), clean(data)),
+          async getConfig(name) { const s = await getDoc(doc(db, 'config', name)); return s.exists() ? s.data() : null; },
+          // --- Relevé Compte Zelle : dépôts sur le compte BUH ---
+          addDepot: data => addDoc(collection(db, 'zelleDepots'), Object.assign(clean(data), { srvTs: serverTimestamp() })),
+          async getDepotsRange(from, to) {
+            const s = await getDocs(query(collection(db, 'zelleDepots'), where('day', '>=', from), where('day', '<=', to)));
+            return s.docs.map(d => Object.assign({}, d.data(), { id: d.id }));
+          },
+          cancelDepot: (id, annulation) => updateDoc(doc(db, 'zelleDepots', id), clean({ status: 'Annulé', annulation })),
           setSolde: (day, data) => setDoc(doc(db, 'soldes', day), clean(Object.assign({}, data, { day }))),
           watchSolde(day, onData, onError) {
             if (unsubSolde) unsubSolde();
